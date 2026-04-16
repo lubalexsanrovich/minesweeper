@@ -2,13 +2,13 @@ import queue
 import random
 from collections import deque
 
-# from direct.showbase.DirectObject import DirectObject
 from core.cell import Cell
+from direct.showbase.DirectObject import DirectObject
 
 
-class Board:  # (DirectObject):
+class Board(DirectObject):
     def __init__(self, width: int, height: int, mine_count: int):
-        # super().__init__()
+        super().__init__()
         self.width = width
         self.height = height
         self.requested_mine_count = mine_count
@@ -22,8 +22,8 @@ class Board:  # (DirectObject):
         self.revealed_safe_cells = 0
         self.safe_cells_total = width * height - mine_count
         self.available_cells = {(x, y) for x in range(width) for y in range(height)}
-        # self.accept("cell_revealed", self.reveal)
-        # self.accept("cell_flagged", self.toggle_flag)
+        self.accept("cell_revealed", self.reveal)
+        self.accept("cell_flagged", self.toggle_flag)
 
     def get_neighbors(self, x: int, y: int):
         for nx in range(x - 1, x + 2):
@@ -252,18 +252,20 @@ class Board:  # (DirectObject):
                 cell.is_revealed = True
                 self.revealed_safe_cells += 1
 
-    def __str__(self) -> str:
-        c = f"flags: {self.mine_count - self.flag_count}\n"
-        for i in range(self.width):
-            for j in range(self.height):
-                cell = self.cells[i][j]
-                if cell.has_mine and self.game_over:
-                    c += "Ж" + " "
-                elif cell.is_revealed:
-                    c += str(cell.adjacent_mines) + " "
-                elif cell.is_flagged:
-                    c += "F" + " "
-                else:
-                    c += "_" + " "
-            c += "\n"
-        return c
+
+# Это на обед
+# def __str__(self) -> str:
+#     c = f"flags: {self.mine_count - self.flag_count}\n"
+#     for i in range(self.width):
+#         for j in range(self.height):
+#             cell = self.cells[i][j]
+#             if cell.has_mine and self.game_over:
+#                 c += "Ж" + " "
+#             elif cell.is_revealed:
+#                 c += str(cell.adjacent_mines) + " "
+#             elif cell.is_flagged:
+#                 c += "F" + " "
+#             else:
+#                 c += "_" + " "
+#         c += "\n"
+#     return c
