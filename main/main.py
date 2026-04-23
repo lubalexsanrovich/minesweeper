@@ -78,7 +78,6 @@ class App(ShowBase):
         self.center_y = self.win.getYSize() // 2
         self.win.movePointer(0, self.center_x, self.center_y)
 
-        self.camLens.setNear(0.05)
 
         self.key_w = KeyboardButton.ascii_key(b'w')
         self.key_a = KeyboardButton.ascii_key(b'a')
