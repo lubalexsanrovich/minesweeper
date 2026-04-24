@@ -4,6 +4,7 @@ import math
 from panda3d.core import CardMaker, TransparencyAttrib
 from player import Player
 from camera import Camera
+from board_control.BoardController import BoardController
 from panda3d.core import KeyboardButton
 
 
@@ -53,6 +54,9 @@ class App(ShowBase):
         # self.jump_speed = 8
         # self.is_grounded = True
         # self.ground_z = 0.0
+
+        # --- доска ---
+        self.board_controller = BoardController(self.loader, self.render, 16, 16, 40, cell_size=1)
 
         # --- камера ---
         self.camera_inst = Camera(self.player, self)
