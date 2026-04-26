@@ -35,8 +35,10 @@ https://github.com/lubalexsanrovich/minesweeper
 
 
 ### Запуск
+- У вас должны быть установлены Git и Python
+- Далее откройте PowerShell
 - Клонируйте репозиторий (ссылка выше)
-- Выполните из корня репозитория:
+- Выполните из корня репозитория (версия для powershell):
 ```bash
 cd minesweeper
 python -m venv venv 
