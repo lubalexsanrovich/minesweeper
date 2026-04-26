@@ -11,6 +11,8 @@
 ## Ссылка на реп
 https://github.com/lubalexsanrovich/minesweeper
 
+
+
 ## План фич
 
 ### Итерация 1

@@ -1,6 +1,18 @@
-from dataclasses import dataclass
-from panda3d.core import Vec3
+from __future__ import annotations
+
 import math
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+from panda3d.core import BitMask32, Vec3
+
+from protocols import AppProtocol
+
+if TYPE_CHECKING:
+    from .player import Player
+
+LOCAL_CAM_MASK = BitMask32.bit(0)
+REMOTE_CAM_MASK = BitMask32.bit(1)
 
 
 @dataclass
@@ -15,48 +27,62 @@ class CameraConfig:
 
 
 class Camera(CameraConfig):
-    def __init__(self, player, app, **config):
+
+    """
+    
+        Класс камеры, отвечающий за позиционирование и ориентацию камеры в зависимости от режима (первое лицо или третье лицо).
+        В режиме первого лица камера прикрепляется к голове игрока и повторяет его повороты.
+        В режиме третьего лица камера отдаляется от игрока на определенное расстояние и смотрит на него.
+        Также обрабатывает ввод мыши для изменения угла обзора и зума камеры.
+    
+    """
+
+    def __init__(self, player: Player, app: AppProtocol, **config: Any) -> None:
         super().__init__(**config)
-        self.player = player
-        self.app = app
+        self.player: Player = player
+        self.app: AppProtocol = app
 
     @property
-    def center_x(self):
+    def center_x(self) -> int:
         return self.app.win.getXSize() // 2
 
     @property
-    def center_y(self):
+    def center_y(self) -> int:
         return self.app.win.getYSize() // 2
 
-    def zoom_in(self):
+    def zoom_in(self) -> None:
+        """приближение камеры"""
         if self.camera_mode == "third":
             self.third_person_distance = max(
                 self.min_distance,
-                self.third_person_distance - 1.0
+                self.third_person_distance - 1.0,
             )
 
-    def zoom_out(self):
+    def zoom_out(self) -> None:
+        """отдаление камеры"""
         if self.camera_mode == "third":
             self.third_person_distance = min(
                 self.max_distance,
-                self.third_person_distance + 1.0
+                self.third_person_distance + 1.0,
             )
 
-    def toggle_camera_mode(self):
+    def toggle_camera_mode(self) -> None:
+        """изменение режима камеры"""
         if self.camera_mode == "fps":
             self.camera_mode = "third"
             self.pitch = -20.0
-
+            self.player.visual.show(LOCAL_CAM_MASK)
             self.camera_yaw = self.player.get_view_heading()
         else:
             self.camera_mode = "fps"
             self.pitch = 0.0
-
+            self.player.visual.hide(LOCAL_CAM_MASK)
             self.camera_yaw = self.player.get_view_heading()
 
         self.app.win.movePointer(0, self.center_x, self.center_y)
 
-    def update_mouse_look(self):
+    def update_mouse_look(self) -> None:
+        """обновление мышки и обработка поворота камеры относительно движения мыши"""
         if not self.app.mouseWatcherNode.hasMouse():
             return
 
@@ -76,15 +102,15 @@ class Camera(CameraConfig):
 
         self.app.win.movePointer(0, self.center_x, self.center_y)
 
-    def get_ground_basis(self):
+    def get_ground_basis(self) -> tuple[Vec3, Vec3]:
+        """получение базиса камеры для последующего вычисления движения игрока"""
         h = math.radians(self.camera_yaw)
-
         forward = Vec3(math.sin(h), math.cos(h), 0)
         right = Vec3(math.cos(h), -math.sin(h), 0)
-
         return forward, right
 
-    def update_camera(self):
+    def update_camera(self) -> None:
+        """обновление камеры"""
         target = self.player.head.getPos(self.app.render)
 
         if self.camera_mode == "fps":
@@ -97,7 +123,7 @@ class Camera(CameraConfig):
 
         if self.app.camera.getParent() != self.app.render:
             self.app.camera.reparentTo(self.app.render)
-        
+
         h = math.radians(self.camera_yaw)
         p = math.radians(self.pitch)
 

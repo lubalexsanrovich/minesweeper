@@ -1,259 +1,178 @@
+from __future__ import annotations
+
+from typing import Any
+
 from direct.showbase.ShowBase import ShowBase
-from panda3d.core import WindowProperties, Vec3
-import math
-from panda3d.core import CardMaker, TransparencyAttrib
-from player import Player
-from camera import Camera
-from board_control.BoardController import BoardController
-from panda3d.core import KeyboardButton
+from panda3d.core import KeyboardButton, WindowProperties, ModifierButtons
 
-
-
-
-max_lr = 0
-max_fb = 0
+from .camera import Camera, LOCAL_CAM_MASK
+from .mousePicker import MousePicker
+from .player import Player
+from board_control.BoardController import ActionResult, BoardController
 
 
 class App(ShowBase):
-    def __init__(self):
+
+    """
+        Главный класс приложения, отвечающий за инициализацию и основной цикл игры.
+        Рисует сцену, создает игрока, доску и обработчик камеры, мыши. 
+        Обрабатывает ввод и состояние игры (победа/поражение).
+    """
+
+    def __init__(self) -> None:
         super().__init__()
         self.disableMouse()
 
-        # --- сцена ---
+        self._setup_scene()
+        self._setup_player()
+        self._setup_board()
+        self._setup_camera()
+        self._setup_window()
+        self._setup_input()
+
+        self.mouse_picker: MousePicker = MousePicker(self)
+
+        self.taskMgr.add(self.update, "update")
+
+    def _setup_scene(self) -> None:
+        """отрисовка сцены"""
         self.scene = self.loader.loadModel("models/environment")
         self.scene.reparentTo(self.render)
         self.scene.setScale(0.25, 0.25, 0.25)
         self.scene.setPos(-8, 42, 0)
-        self.scene.setShaderAuto()
 
-        # --- игрок ---
-        self.player = Player(self.loader, self.render, "models/panda.egg", x=0, y=0, z=0)
+    def _setup_player(self) -> None:
+        """создание игрока"""
+        self.player: Player = Player(
+            self.loader,
+            self.render,
+            "models/panda.egg",
+            x=0,
+            y=0,
+            z=0,
+        )
 
+    def _setup_board(self) -> None:
+        """создание поля"""
+        self.board_controller: BoardController = BoardController(
+            self.loader,
+            self.render,
+            16,
+            16,
+            40,
+            cell_size=2,
+        )
+        self.board_controller.build_board(x0=-8, y0=-8)
 
-        # cm = CardMaker("player_card")
-        # cm.setFrame(-0.5, 0.5, 0, 1.5)
-        # self.player_model = self.loader.loadModel("models/panda.egg")
-        # self.player_model.reparentTo(self.player)
-        # self.player_model.setScale(0.25)
-        # self.player_model.setPos(0, 0, 0)
+    def _setup_camera(self) -> None:
+        """создание обработчика камеры"""
+        self.camera_inst: Camera = Camera(self.player, self)
+        self.cam.node().setCameraMask(LOCAL_CAM_MASK)
+        self.camLens.setFov(90)
 
+    def _setup_input(self) -> None:
+        """обработка входящих событий"""
+        self.key_w = KeyboardButton.ascii_key(b"w")
+        self.key_a = KeyboardButton.ascii_key(b"a")
+        self.key_s = KeyboardButton.ascii_key(b"s")
+        self.key_d = KeyboardButton.ascii_key(b"d")
+        self.key_shift = KeyboardButton.shift()
+        self.key_v = KeyboardButton.ascii_key(b"v")
+        self.key_space = KeyboardButton.space()
+        self.input_enabled: bool = True
 
-        # self.player_sprite = self.player.attachNewNode(cm.generate())
-        # self.player_sprite.setPos(0, 0, 0)
+        self.mouseWatcherNode.set_modifier_buttons(ModifierButtons())
+        self.buttonThrowers[0].node().set_modifier_buttons(ModifierButtons())
 
-        # tex = self.loader.loadTexture("assets/epstein.png")
-        # self.player_sprite.setTexture(tex)
-        # self.player_sprite.setTransparency(TransparencyAttrib.MAlpha)
-        # self.head_height = 1.8
-        # self.head = self.player.attachNewNode("head")
-        # self.head.setZ(self.head_height)
-        # self.player_sprite.setBillboardPointEye()
+        self.accept("mouse1", self.left_click)
+        self.accept("mouse3", self.right_click)
+        self.accept("wheel_up", self.camera_inst.zoom_in)
+        self.accept("wheel_down", self.camera_inst.zoom_out)
+        self.accept("v", self.camera_inst.toggle_camera_mode)
+        self.accept("escape", self.quit_game)
 
-        # self.vertical_velocity = 0.0
-        # self.gravity = -22
-        # self.jump_speed = 8
-        # self.is_grounded = True
-        # self.ground_z = 0.0
-
-        # --- доска ---
-        self.board_controller = BoardController(self.loader, self.render, 16, 16, 40, cell_size=1)
-
-        # --- камера ---
-        self.camera_inst = Camera(self.player, self)
-        # self.mouse_sensitivity = 0.03
-        # self.walk_speed = 6.0
-        # self.run_speed = 12.0
-        # self.camera_yaw = 0.0
-
-        # self.pitch = -20.0
-        # self.third_person_distance = 8.0
-        # self.min_distance = 3.0
-        # self.max_distance = 20.0
-
-        # self.first_mouse_frame = True
-
+    def _setup_window(self) -> None:
+        """настройка окна"""
         props = WindowProperties()
         props.setCursorHidden(True)
         props.setMouseMode(WindowProperties.M_absolute)
         props.setTitle("Сапер 3D")
-        # props.setFullscreen(True)
+        props.setUndecorated(True)
+        props.setSize(
+            self.pipe.getDisplayWidth(),
+            self.pipe.getDisplayHeight(),
+        )
+        props.setOrigin(0, 0)
         self.win.requestProperties(props)
 
-        self.center_x = self.win.getXSize() // 2
-        self.center_y = self.win.getYSize() // 2
-        self.win.movePointer(0, self.center_x, self.center_y)
+    def left_click(self) -> None:
+        coords = self.mouse_picker.pick_cell()
+        if not coords:
+            return
 
+        result: ActionResult = self.board_controller.reveal_cell(*coords)
+        if result.game_over or result.won:
+            self.manage_end(result)
 
-        self.key_w = KeyboardButton.ascii_key(b'w')
-        self.key_a = KeyboardButton.ascii_key(b'a')
-        self.key_s = KeyboardButton.ascii_key(b's')
-        self.key_d = KeyboardButton.ascii_key(b'd')
-        self.key_shift = KeyboardButton.shift()
-        self.key_v = KeyboardButton.ascii_key(b'v')
-        self.key_space = KeyboardButton.space()
+    def right_click(self) -> None:
+        coords = self.mouse_picker.pick_cell()
+        if coords:
+            self.board_controller.toggle_flag(*coords)
 
-        self.accept("wheel_up", self.camera_inst.zoom_in)
-        self.accept("wheel_down", self.camera_inst. zoom_out)
-        self.accept("v", self.camera_inst.toggle_camera_mode)
-
-        self.taskMgr.add(self.update, "update")
-
-
-    # def zoom_in(self):
-    #     if self.camera_mode == "third":
-    #         self.third_person_distance = max(
-    #             self.min_distance, self.third_person_distance - 1.0
-    #         )
-
-    # def zoom_out(self):
-    #     if self.camera_mode == "third":
-    #         self.third_person_distance = min(
-    #             self.max_distance, self.third_person_distance + 1.0
-    #         )
-
-    # def toggle_camera_mode(self):
-    #     if self.camera_mode == "fps":
-    #         self.camera_mode = "third"
-    #         self.pitch = -20.0
-    #     else:
-    #         self.camera_mode = "fps"
-    #         self.pitch = 0.0
-
-    #     self.first_mouse_frame = True
-    #     self.win.movePointer(0, self.center_x, self.center_y)
-
-    # def try_jump(self):
-    #     if self.is_grounded:
-    #         self.vertical_velocity = self.jump_speed
-    #         self.is_grounded = False
-
-    def update(self, task):
+    def update(self, task: Any) -> Any:
+        """потактовое обновление"""
         dt = globalClock.getDt()
 
+        x, y, run, jump = self._read_movement_input()
+
+        if jump:
+            self.player.try_jump()
+
+        self._move_player(x, y, dt, run)
+        self.player.update_vertical(dt)
+        self.camera_inst.update_camera()
+        self.camera_inst.update_mouse_look()
+
+        return task.cont
+
+    def _read_movement_input(self) -> tuple[float, float, bool, bool]:
+        """обработка входящих событий от клавиатуры для движения игрока"""
         is_down = self.mouseWatcherNode.is_button_down
-
-        forward = is_down(self.key_w)
-        left = is_down(self.key_a)
-        back = is_down(self.key_s)
-        right = is_down(self.key_d)
-        run = is_down(self.key_shift)
-        jump = is_down(self.key_space)
-
-        # if self.mouseWatcherNode.hasMouse():
-        #     md = self.win.getPointer(0)
-        #     dx = md.getX() - self.center_x
-        #     dy = md.getY() - self.center_y
-
-        #     if self.first_mouse_frame:
-        #         dx = 0
-        #         dy = 0
-        #         self.first_mouse_frame = False
-
-        #     if self.camera_mode == "fps":
-        #         self.player.setH(self.player.getH() - dx * self.mouse_sensitivity)
-        #         self.camera_yaw = self.player.getH()
-        #     else:
-        #         self.camera_yaw += dx * self.mouse_sensitivity
-
-        #     self.pitch -= dy * self.mouse_sensitivity
-        #     self.pitch = max(-80.0, min(80.0, self.pitch))
-
-        #     self.win.movePointer(0, self.center_x, self.center_y)
-
-        # speed = self.run_speed if run else self.walk_speed
 
         x = 0.0
         y = 0.0
-        z = 0.0
 
-        if left:
+        if is_down(self.key_a):
             x -= 1
-        if right:
+        if is_down(self.key_d):
             x += 1
-        if forward:
+        if is_down(self.key_w):
             y += 1
-        if back:
+        if is_down(self.key_s):
             y -= 1
-        if jump:
-            self.player.try_jump()
-        
+
+        run = is_down(self.key_shift)
+        jump = is_down(self.key_space)
+
+        return x, y, run, jump
+
+    def _move_player(self, x: float, y: float, dt: float, run: bool) -> None:
+        """обработка движения игрока в зависимости от режима камеры"""
         if self.camera_inst.camera_mode == "fps":
             self.player.move_fps(x, y, dt, run)
         else:
             cam_forward, cam_right = self.camera_inst.get_ground_basis()
             self.player.move_third_person(x, y, dt, cam_forward, cam_right, run)
-            
-        self.player.update_vertical(dt)
-        self.camera_inst.update_camera()
-        self.camera_inst.update_mouse_look()
-        
-        
-        # if x != 0 or y != 0:
-        #     length = math.sqrt(x * x + y * y)
-        #     x /= length
-        #     y /= length
 
-        #     x *= speed * dt
-        #     y *= speed * dt
+    def manage_end(self, result: ActionResult) -> None:
+        """обработка конца игры (победа/поражение)"""
+        self.input_enabled = False
+        self.board_controller.reveal_all()
 
-        #     if self.camera_mode == "fps":
-        #         self.player.setPos(self.player, x, y, z)
-        #     else:
-        #         h = math.radians(self.camera_yaw)
-        #         dx = Vec3(math.cos(h), -math.sin(h), 0)
-        #         dy = Vec3(math.sin(h), math.cos(h), 0)
-        #         move_vec = dx * x + dy * y
-        #         self.player.setPos(self.render, self.player.getPos(self.render) + move_vec)
-        #         self.player.setH(h)
-                
-
-
-        # if not self.is_grounded:
-        #     self.vertical_velocity += self.gravity * dt
-        #     new_z = self.player.getZ() + self.vertical_velocity * dt
-
-        #     if new_z <= self.ground_z:
-        #         new_z = self.ground_z
-        #         self.vertical_velocity = 0.0
-        #         self.is_grounded = True
-        #     z += new_z - self.player.getZ()
-        # self.player.setZ(self.player.getZ() + z)
-
-        
-        return task.cont
-
-    # def update_camera(self):
-    #     target = self.head.getPos(self.render)
-
-    #     if self.camera_mode == "fps":
-    #         if self.camera.getParent() != self.head:
-    #             self.camera.reparentTo(self.head)
-
-    #         self.camera.setPos(0, 0, 0)
-    #         self.camera.setHpr(0, self.pitch, 0)
-    #         return
-
-    #     if self.camera.getParent() != self.render:
-    #         self.camera.reparentTo(self.render)
-
-
-    #     h = math.radians(self.camera_yaw)
-    #     p = math.radians(self.pitch)
-
-    #     forward = Vec3(
-    #         math.sin(h) * math.cos(p),
-    #         math.cos(h) * math.cos(p),
-    #         math.sin(p),
-    #     )
-
-    #     cam_pos = target - forward * self.third_person_distance
-    #     self.camera.setPos(cam_pos)
-    #     self.camera.lookAt(target)
-    #     self.player_model.setH(self.camera.getH() + 180)
-
+    def quit_game(self) -> None:
+        """выход из игры"""
+        self.userExit()
 
 
 app = App()
 app.run()
-
-
