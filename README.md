@@ -11,8 +11,6 @@
 ## Ссылка на реп
 https://github.com/lubalexsanrovich/minesweeper
 
-
-
 ## План фич
 
 ### Итерация 1
@@ -34,3 +32,14 @@ https://github.com/lubalexsanrovich/minesweeper
 - **python-enet** — сетевая синхронизация.
 - **pytest** — тестирование.
 - **cProfile** + **snakeviz** — профилирование.
+
+
+### Запуск
+- Клонируйте репозиторий (ссылка выше)
+- Выполните из корня репозитория:
+```bash
+cd minesweeper
+python -m venv venv 
+venv\Scripts\python -m pip install -r requirements.txt
+venv\Scripts\python -m main.main
+```
