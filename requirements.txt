@@ -1,4 +1,3 @@
 panda3d==1.10.16
-pyenet==1.3.17
 pytest==9.0.3
 snakeviz==2.2.2
