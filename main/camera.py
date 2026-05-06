@@ -83,6 +83,8 @@ class Camera(CameraConfig):
 
     def update_mouse_look(self) -> None:
         """обновление мышки и обработка поворота камеры относительно движения мыши"""
+        if self.app._GUI_manager.is_on:
+            return
         if not self.app.mouseWatcherNode.hasMouse():
             return
 

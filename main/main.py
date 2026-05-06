@@ -9,8 +9,8 @@ from .camera import Camera, LOCAL_CAM_MASK
 from .mousePicker import MousePicker
 from .player import Player
 from board_control.BoardController import ActionResult, BoardController
-from direct.gui.DirectGUI import *
-
+from direct.gui.DirectGui import *
+from .gui import GUI
 
 class App(ShowBase):
 
@@ -24,37 +24,25 @@ class App(ShowBase):
         super().__init__()
         self.disableMouse()
 
-        # self._setup_scene()
-        # self._setup_player()
-        # self._setup_board()
-        # self._setup_camera()
-        self._game_started = False
-        self._setup_window()
-        self._setup_start_menu()
+        self._game_started: bool = False
+        self._GUI_manager: GUI = GUI(self)
+        self._GUI_manager.start_menu()
 
-        # self._setup_input()
-
-        # self.mouse_picker: MousePicker = MousePicker(self)
-
-        self.taskMgr.add(self.update, "update")
-
-    def _setup_start_menu(self):
-        self.title = DirectLabel(text="Сапер!!", scale=0.1, pos=(0,0,0.3))
-        self.start_button = DirectButton(text="Играть", scale=0.08, pos=(0,0,0.0), command=self._setup_start_game)
-    def _setup_start_game(self):
-        if self._game_started:
-            return
-        
-        self._game_started = True
-
+    
+    def _start_game(self) -> None:
+        """инициализация игры после нажатия кнопки 'Начать игру'"""
+        self.props.setCursorHidden(True)
+        self.win.requestProperties(self.props)
+        self._GUI_manager.clean_menu()
+        self.input_enabled = True
         self._setup_scene()
         self._setup_player()
         self._setup_board()
         self._setup_camera()
-
         self._setup_input()
-        self.mouse_picker: MousePicker = MousePicker(self)
-
+        self.mouse_picker = MousePicker(self)
+        self._game_started = True
+        self.taskMgr.add(self.update, "update")
 
     def _setup_scene(self) -> None:
         """отрисовка сцены"""
@@ -111,23 +99,24 @@ class App(ShowBase):
         self.accept("wheel_up", self.camera_inst.zoom_in)
         self.accept("wheel_down", self.camera_inst.zoom_out)
         self.accept("v", self.camera_inst.toggle_camera_mode)
-        self.accept("escape", self.quit_game)
+        self.accept("escape", self._GUI_manager.show_pause_menu)
 
     def _setup_window(self) -> None:
         """настройка окна"""
-        props = WindowProperties()
-        props.setCursorHidden(True)
-        props.setMouseMode(WindowProperties.M_absolute)
-        props.setTitle("Сапер 3D")
-        props.setUndecorated(True)
-        props.setSize(
+        self.props = WindowProperties()
+        self.props.setCursorHidden(True)
+        self.props.setMouseMode(WindowProperties.M_absolute)
+        self.props.setTitle("Сапер 3D")
+        self.props.setUndecorated(True)
+        self.props.setSize(
             self.pipe.getDisplayWidth(),
             self.pipe.getDisplayHeight(),
         )
-        props.setOrigin(0, 0)
-        self.win.requestProperties(props)
+        self.props.setOrigin(0, 0)
+        self.win.requestProperties(self.props)
 
     def left_click(self) -> None:
+        print("left click")
         coords = self.mouse_picker.pick_cell()
         if not coords:
             return
@@ -137,6 +126,7 @@ class App(ShowBase):
             self.manage_end(result)
 
     def right_click(self) -> None:
+        print("right click")
         coords = self.mouse_picker.pick_cell()
         if coords:
             self.board_controller.toggle_flag(*coords)
@@ -159,6 +149,8 @@ class App(ShowBase):
 
     def _read_movement_input(self) -> tuple[float, float, bool, bool]:
         """обработка входящих событий от клавиатуры для движения игрока"""
+        if self._GUI_manager.is_on:
+            return 0,0,False,False
         is_down = self.mouseWatcherNode.is_button_down
 
         x = 0.0
@@ -175,7 +167,6 @@ class App(ShowBase):
 
         run = is_down(self.key_shift)
         jump = is_down(self.key_space)
-
         return x, y, run, jump
 
     def _move_player(self, x: float, y: float, dt: float, run: bool) -> None:

@@ -28,19 +28,19 @@ class BoardView:
         self.cell_nodes: list[list[NodePath]] = []
 
         self.node_textures: dict[int | str, Texture] = {
-            1: self.loader.loadTexture("assets/1.png"),
-            2: self.loader.loadTexture("assets/2.png"),
-            3: self.loader.loadTexture("assets/3.png"),
-            4: self.loader.loadTexture("assets/4.png"),
-            5: self.loader.loadTexture("assets/5.png"),
-            6: self.loader.loadTexture("assets/6.png"),
-            7: self.loader.loadTexture("assets/7.png"),
-            8: self.loader.loadTexture("assets/8.png"),
-            "bomb": self.loader.loadTexture("assets/bomb.jpg"),
-            "empty": self.loader.loadTexture("assets/empty.png"),
-            "flag": self.loader.loadTexture("assets/flag.jpg"),
+            1: self.loader.loadTexture("assets/textures/1.png"),
+            2: self.loader.loadTexture("assets/textures/2.png"),
+            3: self.loader.loadTexture("assets/textures/3.png"),
+            4: self.loader.loadTexture("assets/textures/4.png"),
+            5: self.loader.loadTexture("assets/textures/5.png"),
+            6: self.loader.loadTexture("assets/textures/6.png"),
+            7: self.loader.loadTexture("assets/textures/7.png"),
+            8: self.loader.loadTexture("assets/textures/8.png"),
+            "bomb": self.loader.loadTexture("assets/textures/bomb.jpg"),
+            "empty": self.loader.loadTexture("assets/textures/empty.png"),
+            "flag": self.loader.loadTexture("assets/textures/flag.jpg"),
         }
-        self.hidden_texture: Texture = self.loader.loadTexture("assets/hiden.jpg")
+        self.hidden_texture: Texture = self.loader.loadTexture("assets/textures/hiden.jpg")
 
     def create_board(self, x0: int, y0: int) -> None:
         """ Создает клетки поля в зависимости от переданных координат начала поля """
