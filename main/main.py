@@ -9,6 +9,7 @@ from .camera import Camera, LOCAL_CAM_MASK
 from .mousePicker import MousePicker
 from .player import Player
 from board_control.BoardController import ActionResult, BoardController
+from direct.gui.DirectGUI import *
 
 
 class App(ShowBase):
@@ -23,16 +24,37 @@ class App(ShowBase):
         super().__init__()
         self.disableMouse()
 
+        # self._setup_scene()
+        # self._setup_player()
+        # self._setup_board()
+        # self._setup_camera()
+        self._game_started = False
+        self._setup_window()
+        self._setup_start_menu()
+
+        # self._setup_input()
+
+        # self.mouse_picker: MousePicker = MousePicker(self)
+
+        self.taskMgr.add(self.update, "update")
+
+    def _setup_start_menu(self):
+        self.title = DirectLabel(text="Сапер!!", scale=0.1, pos=(0,0,0.3))
+        self.start_button = DirectButton(text="Играть", scale=0.08, pos=(0,0,0.0), command=self._setup_start_game)
+    def _setup_start_game(self):
+        if self._game_started:
+            return
+        
+        self._game_started = True
+
         self._setup_scene()
         self._setup_player()
         self._setup_board()
         self._setup_camera()
-        self._setup_window()
-        self._setup_input()
 
+        self._setup_input()
         self.mouse_picker: MousePicker = MousePicker(self)
 
-        self.taskMgr.add(self.update, "update")
 
     def _setup_scene(self) -> None:
         """отрисовка сцены"""
