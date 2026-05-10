@@ -1,7 +1,6 @@
+from __future__ import annotations
 from direct.gui.DirectGui import *
 from panda3d.core import TextNode
-
-from __future__ import annotations
 
 from collections.abc import Callable
 from typing import Any
