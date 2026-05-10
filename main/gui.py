@@ -231,28 +231,78 @@ class GUI:
         self.widgets.extend([self.title, self.minmax_button, self.minmax_label, self.casual_button, self.casual_label, self.back_button])
     
     def multiplayer_connection(self) -> None:
+        self.current_stage = "multiplayer_connection"
+
         self.title = DirectLabel(
-            text="Введите код игры",
+            text="Подключение к комнате",
             scale=0.1,
-            pos=(0, 0, 0.2),
+            pos=(0, 0, 0.35),
             frameColor=(0, 0, 0, 0),
             text_font=self.font
         )
 
+        self.ip_label = DirectLabel(
+            text="IP сервера",
+            scale=0.055,
+            pos=(-0.45, 0, 0.12),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font,
+            text_align=TextNode.ALeft,
+        )
+
+        self.server_ip_entry = DirectEntry(
+            text="",
+            initialText="192.168.1.35",
+            scale=0.055,
+            pos=(0.0, 0, 0.1),
+            width=10,
+        )
+
+        self.code_label = DirectLabel(
+            text="Код комнаты",
+            scale=0.055,
+            pos=(-0.45, 0, -0.08),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font,
+            text_align=TextNode.ALeft,
+        )
+
         self.code_entry = DirectEntry(
             text="",
-            scale=0.06,
-            pos=(-0.3, 0, 0),
+            scale=0.055,
+            pos=(0.0, 0, -0.1),
+            width=10,
         )
 
         self.join_button = DirectButton(
             text="Присоединиться",
             scale=0.07,
-            pos=(0,0,-0.2),
-            command=lambda: self.app._join_coop_game(self.code_entry.get(), "Player"),
+            pos=(0, 0, -0.32),
+            command=lambda: self.app._join_coop_game(
+                game_code=self.code_entry.get(),
+                player_name="Player",
+                server_ip=self.server_ip_entry.get(),
+            ),
             text_font=self.font
         )
-        self.widgets.extend([self.title, self.code_entry, self.join_button])
+
+        self.back_button = DirectButton(
+            text="Назад",
+            scale=0.07,
+            pos=(-1.4, 0, 0.87),
+            command=self.go_back,
+            text_font=self.font
+        )
+
+        self.widgets.extend([
+            self.title,
+            self.ip_label,
+            self.server_ip_entry,
+            self.code_label,
+            self.code_entry,
+            self.join_button,
+            self.back_button,
+        ])
 
     def show_pause_menu(self) -> None:
         if self.is_on:

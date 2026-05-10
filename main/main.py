@@ -70,7 +70,7 @@ class App(ShowBase):
                 "uvicorn",
                 "server.app:app",
                 "--host",
-                "127.0.0.1",
+                "0.0.0.0",
                 "--port",
                 "8000",
             ],
@@ -90,6 +90,20 @@ class App(ShowBase):
 
         print("[Server] Failed to start server")
         return False
+    
+    def _set_server_url_from_ip(self, server_ip: str) -> None:
+        server_ip = server_ip.strip()
+
+        if not server_ip:
+            print("[Coop] Empty server IP")
+            return
+
+        if server_ip.startswith("http://") or server_ip.startswith("https://"):
+            self.server_url = server_ip.rstrip("/")
+        else:
+            self.server_url = f"http://{server_ip}:8000"
+
+        print(f"[Coop] Server URL set to: {self.server_url}")
 
     def _stop_local_server(self) -> None:
         if self.server_process is None:
@@ -149,10 +163,18 @@ class App(ShowBase):
         print(f"[Coop] Created room: {self.room_code}")
         print(f"[Coop] Game mode: {game_mode}")
 
-    def _join_coop_game(self, game_code: str, player_name: str = "Player") -> None:
+    def _join_coop_game(
+        self,
+        game_code: str,
+        player_name: str = "Player",
+        server_ip: str = "",
+    ) -> None:
         """
         Подключиться к уже существующей комнате.
         """
+
+        if server_ip:
+            self._set_server_url_from_ip(server_ip)
 
         game_code = game_code.strip().upper()
 
@@ -176,6 +198,7 @@ class App(ShowBase):
         self.room_code = game_code
 
         print(f"[Coop] Joining room: {self.room_code}")
+        print(f"[Coop] Server: {self.server_url}")
 
     def _start_game_world(self, *, is_coop: bool) -> None:
         """
