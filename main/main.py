@@ -21,7 +21,6 @@ import subprocess
 import sys
 import time
 
-import simplepbr
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
@@ -36,7 +35,6 @@ class App(ShowBase):
 
     def __init__(self) -> None:
         super().__init__()
-        simplepbr.init()
         self.disableMouse()
 
         self._game_started: bool = False
