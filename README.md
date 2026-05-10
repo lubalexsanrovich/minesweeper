@@ -29,7 +29,7 @@ https://github.com/lubalexsanrovich/minesweeper
 
 ## Используемые библиотеки
 - **Panda3D** — 3D-движок.
-- **python-enet** — сетевая синхронизация.
+- **FASTAPI и websockets** — сетевая синхронизация.
 - **pytest** — тестирование.
 - **cProfile** + **snakeviz** — профилирование.
 
@@ -43,3 +43,7 @@ python -m venv venv
 venv\Scripts\python -m pip install -r requirements.txt
 venv\Scripts\python -m main.main
 ```
+## Кооп
+**ВНИМАНИЕ**. Для игры необходимо находиться в ОДНОЙ ЛОКАЛЬНОЙ СЕТИ. Вы должны быть подключены к одному роутеру ЛИБО используйте сервисы по типу Hamachi\RadminVPN
+В консоли выводится номер комнаты хоста. Второй игрок должен ввести IP сервера (то есть IP хоста, можете взять из менюшки Radmin, вспоминайте как в майн играли) и номер комнаты КОТОРУЮ ВАМ ДАСТ ХОСТ!!
+

@@ -1,3 +1,4 @@
 panda3d==1.10.16
 pytest==9.0.3
 snakeviz==2.2.2
+websockets==16.0
