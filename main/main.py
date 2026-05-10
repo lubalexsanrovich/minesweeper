@@ -40,7 +40,7 @@ class App(ShowBase):
         self.disableMouse()
 
         self._game_started: bool = False
-        self.server_url = "http://127.0.0.1:8000"
+        self.server_url: str = "http://127.0.0.1:8000"
 
         self.server_process: subprocess.Popen | None = None
         self.multiplayer: MultiplayerController | None = None
@@ -51,6 +51,7 @@ class App(ShowBase):
         self._GUI_manager.start_menu()
 
     def _is_server_running(self) -> bool:
+        """Проверяет, отвечает ли текущий сервер на health-check."""
         try:
             with urlopen(f"{self.server_url}/health", timeout=0.5) as response:
                 return response.status == 200
@@ -58,6 +59,7 @@ class App(ShowBase):
             return False
 
     def _ensure_server_running(self) -> bool:
+        """Запускает локальный сервер, если он еще не запущен."""
         if self._is_server_running():
             return True
 
@@ -92,6 +94,7 @@ class App(ShowBase):
         return False
     
     def _set_server_url_from_ip(self, server_ip: str) -> None:
+        """Обновляет server_url по IP-адресу хоста."""
         server_ip = server_ip.strip()
 
         if not server_ip:
@@ -106,6 +109,7 @@ class App(ShowBase):
         print(f"[Coop] Server URL set to: {self.server_url}")
 
     def _stop_local_server(self) -> None:
+        """Останавливает локальный сервер, если он был запущен приложением."""
         if self.server_process is None:
             return
 
@@ -132,6 +136,7 @@ class App(ShowBase):
             self._create_coop_game(game_mode)
 
     def _start_singleplayer_game(self) -> None:
+        """Запускает одиночную игру."""
         self._start_game_world(is_coop=False)
 
     def _create_coop_game(self, game_mode: str, player_name: str = "Player") -> None:
@@ -396,6 +401,7 @@ class App(ShowBase):
             self.player.move_third_person(x, y, dt, cam_forward, cam_right, run)
 
     def destroy_game(self) -> None:
+        """Удаляет текущий игровой мир и отключает игровые обработчики."""
         self.taskMgr.remove("update")
 
         if self.multiplayer is not None:

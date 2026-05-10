@@ -22,6 +22,7 @@ class NetworkClient:
     """
 
     def __init__(self, server_url: str = "http://127.0.0.1:8000") -> None:
+        """Создает сетевой клиент и очереди для обмена сообщениями."""
         self.server_url = server_url.rstrip("/")
         self.websocket_url = self.server_url.replace("http://", "ws://").replace(
             "https://", "wss://"
@@ -45,6 +46,7 @@ class NetworkClient:
         max_players: int,
         game_mode: str = "casual",
     ) -> str:
+        """Создает новую комнату на сервере и возвращает ее код."""
         payload = {
             "width": width,
             "height": height,
@@ -66,6 +68,7 @@ class NetworkClient:
             data = json.loads(response.read().decode("utf-8"))
 
         return str(data["game_code"])
+
 
     def connect(self, game_code: str, player_name: str) -> None:
         """
@@ -170,6 +173,7 @@ class NetworkClient:
         return messages
 
     def send_reveal(self, x: int, y: int) -> None:
+        """Отправляет на сервер действие открытия клетки."""
         self.outgoing.put(
             {
                 "type": "reveal",
@@ -179,6 +183,7 @@ class NetworkClient:
         )
 
     def send_toggle_flag(self, x: int, y: int) -> None:
+        """Отправляет на сервер действие установки или снятия флага."""
         self.outgoing.put(
             {
                 "type": "toggle_flag",
@@ -188,4 +193,5 @@ class NetworkClient:
         )
 
     def disconnect(self) -> None:
+        """Запрашивает закрытие WebSocket-соединения."""
         self.outgoing.put(None)

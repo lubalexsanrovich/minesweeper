@@ -111,8 +111,6 @@ async def game_websocket(
 
         while True:
             payload = await websocket.receive_json()
-            print(f"[WebSocket] Action from {player_id}: {payload}")
-
             response = await session.apply_action(player_id, payload)
 
             if response["type"] == "error":

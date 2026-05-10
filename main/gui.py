@@ -1,20 +1,28 @@
 from direct.gui.DirectGui import *
 from panda3d.core import TextNode
 
-class GUI:
-    def __init__(self, app):
-        self.app = app
-        self.is_on = False
-        self.widgets = []
-        self.current_stage = "start_menu"
+from __future__ import annotations
 
-        self.scenes = {
+from collections.abc import Callable
+from typing import Any
+
+
+
+class GUI:
+    def __init__(self, app: Any) -> None:
+        """Создает менеджер GUI и хранит состояние текущего меню."""
+        self.app: Any = app
+        self.is_on: bool = False
+        self.widgets: list[Any] = []
+        self.current_stage: str = "start_menu"
+
+        self.scenes: dict[str, Callable[[], None]] = {
             "start_menu": self.start_menu,
             "choose": self.choose,
             "multiplayer_choose": self.multiplayer_choose,
         }
 
-        self.parents = {
+        self.parents: dict[str, str] = {
             "choose": "start_menu",
             "multiplayer_join_or_create_room": "choose",
             "multiplayer_choose": "multiplayer_join_or_create_room",
@@ -22,6 +30,7 @@ class GUI:
         }
     
     def go_to(self, stage: str) -> None:
+        """Переходит к указанному экрану меню."""
         self.clean_menu()
         self.current_stage = stage
 
@@ -29,6 +38,7 @@ class GUI:
         scene_method()
 
     def go_back(self) -> None:
+        """Возвращает пользователя на родительский экран меню."""
         parent = self.parents.get(self.current_stage)
 
         if parent is None:
@@ -75,6 +85,7 @@ class GUI:
         self.widgets.clear()
     
     def choose(self) -> None:
+        """Показывает меню выбора между одиночной игрой и коопом."""
         self.current_stage = "choose"
         self.title = DirectLabel(
             text="Выберите режим",
@@ -127,7 +138,8 @@ class GUI:
         )
         self.widgets.extend([self.title, self.single_button, self.single_label, self.multi_button, self.multi_label, self.back_button])
 
-    def multiplayer_join_or_create_room(self):
+    def multiplayer_join_or_create_room(self) -> None:
+        """Показывает меню создания комнаты или подключения к ней."""
         self.current_stage = "multiplayer_join_or_create_room"
         self.title = DirectLabel(
             text="Выберите тип подключения",
@@ -231,6 +243,7 @@ class GUI:
         self.widgets.extend([self.title, self.minmax_button, self.minmax_label, self.casual_button, self.casual_label, self.back_button])
     
     def multiplayer_connection(self) -> None:
+        """Показывает форму ввода IP сервера и кода комнаты."""
         self.current_stage = "multiplayer_connection"
 
         self.title = DirectLabel(
@@ -304,7 +317,9 @@ class GUI:
             self.back_button,
         ])
 
+
     def show_pause_menu(self) -> None:
+        """Открывает меню паузы и отключает игровой ввод."""
         if self.is_on:
             return
         self.is_on = True
@@ -346,12 +361,14 @@ class GUI:
         self.widgets.extend([self.pause_frame, self.pause_title, self.resume_button, self.return_to_start_menu_button])
 
     def hide_pause_menu(self) -> None:
+        """Закрывает меню паузы и возвращает игровой ввод."""
         self.app.props.setCursorHidden(True)
         self.app.win.requestProperties(self.app.props)
         self.is_on = False
         self.app.input_enabled = True
 
     def return_to_start_menu(self) -> None:
+        """Возвращает игрока из игры в стартовое меню."""
         self.is_on = False
         self.clean_menu()
         self.app.destroy_game()

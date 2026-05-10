@@ -31,6 +31,7 @@ MAX_SHADER_GLOWS = 48
 
 
 def _make_glow_uniforms() -> str:
+    """Создает GLSL uniform-переменные для источников свечения."""
     return "\n".join(
         f"uniform vec4 glow_pos_range{i};\nuniform vec4 glow_color_intensity{i};"
         for i in range(MAX_SHADER_GLOWS)
@@ -38,6 +39,7 @@ def _make_glow_uniforms() -> str:
 
 
 def _make_glow_body() -> str:
+    """Создает GLSL-код расчета свечения от всех glow-источников."""
     parts: list[str] = []
     for i in range(MAX_SHADER_GLOWS):
         parts.append(
@@ -135,6 +137,7 @@ void main() {{
 
 
 def _make_format() -> GeomVertexFormat:
+    """Создает формат вершин для запеченной геометрии сцены."""
     arr = GeomVertexArrayFormat()
     arr.addColumn(InternalName.getVertex(), 3, Geom.NTFloat32, Geom.CPoint)
     arr.addColumn(InternalName.getNormal(), 3, Geom.NTFloat32, Geom.CNormal)
@@ -150,6 +153,7 @@ SCENE_SHADER = Shader.make(Shader.SL_GLSL, VERTEX_SHADER, FRAGMENT_SHADER)
 
 
 def _v3(data: dict[str, Any] | None, default: tuple[float, float, float] = (0, 0, 0)) -> Vec3:
+    """Преобразует словарь с координатами x, y, z в Vec3."""
     if not data:
         return Vec3(*default)
     return Vec3(float(data.get("x", 0)), float(data.get("y", 0)), float(data.get("z", 0)))
@@ -161,6 +165,7 @@ def _color4(
     *,
     clamp_hdr: bool = False,
 ) -> Vec4:
+    """Преобразует словарь с цветом r, g, b, a в Vec4."""
     if not data:
         return Vec4(*default)
     r = float(data.get("r", default[0]))
@@ -175,6 +180,7 @@ def _color4(
 
 
 def _scaled_emission(data: dict[str, Any] | None, scale: float) -> Vec4:
+    """Возвращает цвет эмиссии с примененным множителем яркости."""
     if not data:
         return Vec4(0, 0, 0, 0)
     r = max(0.0, min(1.5, float(data.get("r", 0)) * scale))
@@ -185,6 +191,7 @@ def _scaled_emission(data: dict[str, Any] | None, scale: float) -> Vec4:
 
 
 def _read_chunk(path: Path, name: str) -> GeomNode:
+    """Читает бинарный chunk сцены и превращает его в GeomNode."""
     data = path.read_bytes()
     off = 0
     vertex_count, index_count = struct.unpack_from("<ii", data, off)
@@ -244,10 +251,10 @@ class Pines2BakedScene:
         collision_mask: BitMask32 | None = None,
         task_name: str = "pines2_baked_scene_update",
     ) -> None:
-        self.app = app
-        self.export_dir = Path(export_dir)
-        self.parent = parent if parent is not None else app.render
-        self.root = self.parent.attachNewNode(root_name)
+        self.app: Any = app
+        self.export_dir: Path = Path(export_dir)
+        self.parent: NodePath = parent if parent is not None else app.render
+        self.root: NodePath = self.parent.attachNewNode(root_name)
         self.root.setShader(SCENE_SHADER, 1)
         self.root.setAntialias(AntialiasAttrib.MAuto)
         self.root.setDepthWrite(True)
@@ -284,15 +291,13 @@ class Pines2BakedScene:
         self.app.taskMgr.add(self._task_update, self.task_name)
 
     def _load_texture(self, rel: str | None) -> Texture | None:
+        """Загружает текстуру по относительному пути и кеширует ее."""
         if not rel:
             return None
         if rel in self.texture_cache:
             return self.texture_cache[rel]
 
         path = self.export_dir / rel
-        if not path.exists():
-            print(f"[Pines2BakedScene] missing texture: {path}")
-            return None
 
         tex = self.app.loader.loadTexture(Filename.fromOsSpecific(str(path)))
         if tex:
@@ -305,6 +310,7 @@ class Pines2BakedScene:
         return tex
 
     def _load_chunks(self) -> None:
+        """Создает NodePath-объекты для всех запеченных частей сцены."""
         chunks = self.scene.get("chunks", [])
         for index, chunk in enumerate(chunks):
             chunk_path = self.export_dir / chunk["file"]
@@ -339,10 +345,12 @@ class Pines2BakedScene:
 
 
     def _task_update(self, task: Task) -> Any:
+        """Обновляет shader input'ы каждый кадр."""
         self.update_shader_inputs()
         return task.cont
 
     def update_shader_inputs(self) -> None:
+        """Передает в шейдер параметры тумана, камеры и свечения."""
         fog = self.scene.get("fog") or {}
         density = float(fog.get("density", 0.015) or 0.015)
         self.root.setShaderInput("fog_enabled", 1.0 if self.settings.fog else 0.0)
@@ -360,7 +368,7 @@ class Pines2BakedScene:
             self.root.setShaderInput(f"glow_color_intensity{i}", zero)
 
     def _update_glow_shader_inputs(self) -> None:
-
+        """Выбирает ближайшие glow-источники и передает их в шейдер."""
         camera_pos = self.app.camera.getPos(self.app.render)
 
         def distance_squared(glow: dict[str, Any]) -> float:
@@ -390,12 +398,15 @@ class Pines2BakedScene:
 
 
     def show(self) -> None:
+        """Показывает корневой узел сцены."""
         self.root.show()
 
     def hide(self) -> None:
+        """Скрывает корневой узел сцены."""
         self.root.hide()
 
     def destroy(self) -> None:
+        """Удаляет сцену, задачу обновления и очищает кеш текстур."""
         self.app.taskMgr.remove(self.task_name)
         self.root.removeNode()
         self.texture_cache.clear()
