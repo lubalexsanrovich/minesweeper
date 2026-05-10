@@ -3,10 +3,12 @@ import random
 from collections import deque
 
 from core.cell import Cell
+from direct.showbase.DirectObject import DirectObject
 
 
-class Board:
+class Board(DirectObject):
     def __init__(self, width: int, height: int, mine_count: int):
+        super().__init__()
         self.width = width
         self.height = height
         self.requested_mine_count = mine_count
@@ -20,6 +22,8 @@ class Board:
         self.revealed_safe_cells = 0
         self.safe_cells_total = width * height - mine_count
         self.available_cells = {(x, y) for x in range(width) for y in range(height)}
+        self.accept("cell_revealed", self.reveal)
+        self.accept("cell_flagged", self.toggle_flag)
 
     def get_neighbors(self, x: int, y: int):
         for nx in range(x - 1, x + 2):
@@ -85,7 +89,7 @@ class Board:
                     q.append((nx, ny))
         return True
 
-    def apply_basic_rules(self, revealed, flagged) -> bool | None:
+    def apply_basic_rules(self, revealed, flagged) -> bool:
         progress = False
         for x in range(self.width):
             for y in range(self.height):
