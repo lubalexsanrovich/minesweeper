@@ -16,7 +16,9 @@ class GUI:
 
         self.parents = {
             "choose": "start_menu",
-            "multiplayer_choose": "choose",
+            "multiplayer_join_or_create_room": "choose",
+            "multiplayer_choose": "multiplayer_join_or_create_room",
+            "multiplayer_connection": "multiplayer_join_or_create_room"
         }
     
     def go_to(self, stage: str) -> None:
@@ -73,6 +75,7 @@ class GUI:
         self.widgets.clear()
     
     def choose(self) -> None:
+        self.current_stage = "choose"
         self.title = DirectLabel(
             text="Выберите режим",
             scale=0.1,
@@ -104,7 +107,7 @@ class GUI:
             scale=0.07,
             pos=(0.55, 0, -0.15),
             frameSize=button_frame,
-            command=lambda: self.go_to("multiplayer_choose"),
+            command=lambda: self.go_to("multiplayer_join_or_create_room"),
         )
 
         self.multi_label = DirectLabel(
@@ -124,19 +127,78 @@ class GUI:
         )
         self.widgets.extend([self.title, self.single_button, self.single_label, self.multi_button, self.multi_label, self.back_button])
 
+    def multiplayer_join_or_create_room(self):
+        self.current_stage = "multiplayer_join_or_create_room"
+        self.title = DirectLabel(
+            text="Выберите тип подключения",
+            scale=0.1,
+            pos=(0, 0, 0.2),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font
+        )
+        button_frame = (-4.8, 4.8, -0.6, 0.6)
+
+        self.single_button = DirectButton(
+            text="",
+            scale=0.07,
+            pos=(-0.55, 0, -0.15),
+            frameSize=button_frame,
+            command=lambda: self.go_to("multiplayer_choose"),
+        )
+
+        self.single_label = DirectLabel(
+            text="Создать комнату",
+            scale=0.07,
+            pos=(-0.55, 0, -0.15 - 0.01),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font,
+            text_align=TextNode.ACenter,
+        )
+
+        self.multi_button = DirectButton(
+            text="",
+            scale=0.07,
+            pos=(0.55, 0, -0.15),
+            frameSize=button_frame,
+            command=lambda: self.go_to("multiplayer_connection"),
+        )
+
+        self.multi_label = DirectLabel(
+            text="Подключиться к комнате",
+            scale=0.07,
+            pos=(0.55, 0, -0.15 - 0.01),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font,
+            text_align=TextNode.ACenter,
+        )
+        self.back_button = DirectButton(
+            text="Назад",
+            scale=0.07,
+            pos=(-1.4, 0, 0.87),
+            command=self.go_back,
+            text_font=self.font
+        )
+        self.widgets.extend([self.title, self.single_button, self.single_label, self.multi_button, self.multi_label, self.back_button])
 
 
     def multiplayer_choose(self):
         """отображение меню выбора режима игры"""
-
+        self.title = DirectLabel(
+            text="Выберите режим игры",
+            scale=0.1,
+            pos=(0, 0, 0.2),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font
+        )
         button_frame = (-4.8, 4.8, -0.6, 0.6)
+        self.current_stage = "multiplayer_choose"
 
         self.casual_button = DirectButton(
             text="",
             scale=0.07,
             pos=(-0.55, 0, -0.15),
             frameSize=button_frame,
-            command=self.app._start_game,
+            command=lambda : self.app._start_game("casual"),
         )
 
         self.casual_label = DirectLabel(
@@ -153,7 +215,7 @@ class GUI:
             scale=0.07,
             pos=(0.55, 0, -0.15),
             frameSize=button_frame,
-            command=self.app._start_game,
+            command=lambda : self.app._start_game("minmax"),
         )
 
         self.minmax_label = DirectLabel(
@@ -168,7 +230,29 @@ class GUI:
 
         self.widgets.extend([self.title, self.minmax_button, self.minmax_label, self.casual_button, self.casual_label, self.back_button])
     
+    def multiplayer_connection(self) -> None:
+        self.title = DirectLabel(
+            text="Введите код игры",
+            scale=0.1,
+            pos=(0, 0, 0.2),
+            frameColor=(0, 0, 0, 0),
+            text_font=self.font
+        )
 
+        self.code_entry = DirectEntry(
+            text="",
+            scale=0.06,
+            pos=(-0.3, 0, 0),
+        )
+
+        self.join_button = DirectButton(
+            text="Присоединиться",
+            scale=0.07,
+            pos=(0,0,-0.2),
+            command=lambda: self.app._join_coop_game(self.code_entry.get(), "Player"),
+            text_font=self.font
+        )
+        self.widgets.extend([self.title, self.code_entry, self.join_button])
 
     def show_pause_menu(self) -> None:
         if self.is_on:
@@ -224,9 +308,3 @@ class GUI:
         self.current_stage = "start_menu"
         self.start_menu()
     
-    def go_to(self, stage: str) -> None:
-        self.clean_menu()
-        self.current_stage = stage
-
-        scene_method = getattr(self, stage)
-        scene_method()

@@ -12,18 +12,25 @@ from board_control.BoardController import ActionResult, BoardController
 from direct.gui.DirectGui import *
 from .gui import GUI
 from scene_runtime.pines2_scene import Pines2BakedScene
+from multiplayer.multiplayer_controller import MultiplayerController
 
 from pathlib import Path
+import json
+from urllib.request import urlopen
+import subprocess
+import sys
+import time
 
 import simplepbr
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
+
 class App(ShowBase):
 
     """
         Главный класс приложения, отвечающий за инициализацию и основной цикл игры.
-        Рисует сцену, создает игрока, доску и обработчик камеры, мыши. 
+        Рисует сцену, создает игрока, доску и обработчик камеры, мыши.
         Обрабатывает ввод и состояние игры (победа/поражение).
     """
 
@@ -31,30 +38,175 @@ class App(ShowBase):
         super().__init__()
         simplepbr.init()
         self.disableMouse()
+
         self._game_started: bool = False
+        self.server_url = "http://127.0.0.1:8000"
+
+        self.server_process: subprocess.Popen | None = None
+        self.multiplayer: MultiplayerController | None = None
+        self.room_code: str | None = None
+        self.is_coop: bool = False
+
         self._GUI_manager: GUI = GUI(self)
         self._GUI_manager.start_menu()
 
-    
-    def _start_game(self) -> None:
-        """инициализация игры после нажатия кнопки 'Начать игру'"""
+    def _is_server_running(self) -> bool:
+        try:
+            with urlopen(f"{self.server_url}/health", timeout=0.5) as response:
+                return response.status == 200
+        except Exception:
+            return False
+
+    def _ensure_server_running(self) -> bool:
+        if self._is_server_running():
+            return True
+
+        print("[Server] Starting local server...")
+
+        self.server_process = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "server.app:app",
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "8000",
+            ],
+            cwd=ROOT_DIR,
+        )
+
+        for _ in range(50):
+            time.sleep(0.1)
+
+            if self._is_server_running():
+                print("[Server] Local server started")
+                return True
+
+            if self.server_process.poll() is not None:
+                print("[Server] Server process stopped unexpectedly")
+                return False
+
+        print("[Server] Failed to start server")
+        return False
+
+    def _stop_local_server(self) -> None:
+        if self.server_process is None:
+            return
+
+        if self.server_process.poll() is None:
+            self.server_process.terminate()
+
+            try:
+                self.server_process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                self.server_process.kill()
+
+        self.server_process = None
+
+    def _start_game(self, game_mode: str | None = None) -> None:
+        """
+        None      -> singleplayer
+        "casual"  -> создать coop-комнату casual
+        "minmax"  -> создать coop-комнату minmax
+        """
+
+        if game_mode is None:
+            self._start_singleplayer_game()
+        else:
+            self._create_coop_game(game_mode)
+
+    def _start_singleplayer_game(self) -> None:
+        self._start_game_world(is_coop=False)
+
+    def _create_coop_game(self, game_mode: str, player_name: str = "Player") -> None:
+        """
+        Создать новую комнату и сразу подключиться к ней.
+        """
+
+        if not self._ensure_server_running():
+            print("[Coop] Cannot create room: server is not running")
+            return
+
+        self._start_game_world(is_coop=True)
+
+        self.multiplayer = MultiplayerController(
+            self,
+            self.board_controller,
+            server_url=self.server_url,
+        )
+
+        self.room_code = self.multiplayer.create_and_join(
+            player_name=player_name,
+            width=16,
+            height=16,
+            mine_count=40,
+            max_players=4,
+            game_mode=game_mode,
+        )
+
+        print(f"[Coop] Created room: {self.room_code}")
+        print(f"[Coop] Game mode: {game_mode}")
+
+    def _join_coop_game(self, game_code: str, player_name: str = "Player") -> None:
+        """
+        Подключиться к уже существующей комнате.
+        """
+
+        game_code = game_code.strip().upper()
+
+        if not game_code:
+            print("[Coop] Empty game code")
+            return
+
+        self._start_game_world(is_coop=True)
+
+        self.multiplayer = MultiplayerController(
+            self,
+            self.board_controller,
+            server_url=self.server_url,
+        )
+
+        self.multiplayer.join(
+            game_code=game_code,
+            player_name=player_name,
+        )
+
+        self.room_code = game_code
+
+        print(f"[Coop] Joining room: {self.room_code}")
+
+    def _start_game_world(self, *, is_coop: bool) -> None:
+        """
+        Общая инициализация мира.
+        Её используют и singleplayer, и create coop, и join coop.
+        """
+
+        self.is_coop = is_coop
+
         self.game_root = self.render.attachNewNode("game_root")
+
         self.props.setCursorHidden(True)
         self.win.requestProperties(self.props)
+
         self._GUI_manager.clean_menu()
+
         self._setup_scene()
         self._setup_player()
         self._setup_board()
         self._setup_camera()
         self._setup_input()
+
         self.mouse_picker = MousePicker(self)
+
         self._game_started = True
         self.taskMgr.add(self.update, "update")
 
     def _setup_scene(self) -> None:
-        """Загружает запечённую Unity-сцену.
-        """
+        """Загружает запечённую Unity-сцену."""
         export_dir = Path("assets/scene_baked_export")
+
         if (export_dir / "scene_baked.json").exists():
             self.pines_scene = Pines2BakedScene(
                 self,
@@ -71,8 +223,6 @@ class App(ShowBase):
             self.pines_scene.root.setPos(-300, -25, 0)
             self.pines_scene.root.setScale(2.25)
             return
-
-
 
     def _setup_player(self) -> None:
         """создание игрока"""
@@ -140,18 +290,39 @@ class App(ShowBase):
         self.win.requestProperties(self.props)
 
     def left_click(self) -> None:
+        if not self.input_enabled:
+            return
+
         coords = self.mouse_picker.pick_cell()
+
         if not coords:
             return
 
+        if self.is_coop:
+            if self.multiplayer is not None:
+                self.multiplayer.reveal_cell(*coords)
+            return
+
         result: ActionResult = self.board_controller.reveal_cell(*coords)
+
         if result.game_over or result.won:
             self.manage_end(result)
 
     def right_click(self) -> None:
+        if not self.input_enabled:
+            return
+
         coords = self.mouse_picker.pick_cell()
-        if coords:
-            self.board_controller.toggle_flag(*coords)
+
+        if not coords:
+            return
+
+        if self.is_coop:
+            if self.multiplayer is not None:
+                self.multiplayer.toggle_flag(*coords)
+            return
+
+        self.board_controller.toggle_flag(*coords)
 
     def update(self, task: Any) -> Any:
         """потактовое обновление"""
@@ -172,7 +343,8 @@ class App(ShowBase):
     def _read_movement_input(self) -> tuple[float, float, bool, bool]:
         """обработка входящих событий от клавиатуры для движения игрока"""
         if self._GUI_manager.is_on:
-            return 0,0,False,False
+            return 0, 0, False, False
+
         is_down = self.mouseWatcherNode.is_button_down
 
         x = 0.0
@@ -189,6 +361,7 @@ class App(ShowBase):
 
         run = is_down(self.key_shift)
         jump = is_down(self.key_space)
+
         return x, y, run, jump
 
     def _move_player(self, x: float, y: float, dt: float, run: bool) -> None:
@@ -198,9 +371,13 @@ class App(ShowBase):
         else:
             cam_forward, cam_right = self.camera_inst.get_ground_basis()
             self.player.move_third_person(x, y, dt, cam_forward, cam_right, run)
-    
+
     def destroy_game(self) -> None:
         self.taskMgr.remove("update")
+
+        if self.multiplayer is not None:
+            self.multiplayer.destroy()
+            self.multiplayer = None
 
         self._ignore_input()
 
@@ -219,10 +396,14 @@ class App(ShowBase):
         self._game_started = False
 
     def manage_end(self, result: ActionResult) -> None:
-        """обработка конца игры (победа/поражение)"""
+        """обработка конца игры"""
         self.input_enabled = False
+
+        if self.is_coop:
+            return
+
         self.board_controller.reveal_all()
-    
+
     def _ignore_input(self):
         self.ignore("mouse1")
         self.ignore("mouse3")
@@ -232,9 +413,9 @@ class App(ShowBase):
         self.ignore("escape")
         self.input_enabled = False
 
-
     def quit_game(self) -> None:
         """выход из игры"""
+        self._stop_local_server()
         self.userExit()
 
 

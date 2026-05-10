@@ -3,7 +3,7 @@ from __future__ import annotations
 from direct.showbase.Loader import Loader
 from panda3d.core import BitMask32, NodePath, Texture, TextureStage
 
-from core.board import Board
+
 
 
 class BoardView:
@@ -16,12 +16,10 @@ class BoardView:
     def __init__(
         self,
         loader: Loader,
-        board: Board,
         render: NodePath,
         cell_size: float,
     ) -> None:
         self.loader: Loader = loader
-        self.board: Board = board
         self.render: NodePath = render
         self.cell_size: float = cell_size
         self.nodePath: NodePath = self.render.attachNewNode("board")
@@ -43,11 +41,14 @@ class BoardView:
         }
         self.hidden_texture: Texture = self.loader.loadTexture("assets/textures/closed.jpg")
 
-    def create_board(self, x0: int, y0: int) -> None:
-        """ Создает клетки поля в зависимости от переданных координат начала поля """
+    def create_board(self, width: int, height: int, x0: int = 0, y0: int = 0) -> None:
+        """Создает клетки поля в зависимости от переданных координат начала поля."""
         self.cell_nodes = [
-            [self._create_cell(bx, by, x0 + bx, y0 + by) for by in range(self.board.height)]
-            for bx in range(self.board.width)
+            [
+                self._create_cell(bx, by, x0 + bx, y0 + by)
+                for by in range(height)
+            ]
+            for bx in range(width)
         ]
 
     def _create_cell(self, bx: int, by: int, wx: int, wy: int) -> NodePath:
@@ -78,3 +79,6 @@ class BoardView:
             node.setTexture(tex, 1)
             node.setTexScale(TextureStage.getDefault(), 1, -1)
             node.setTexOffset(TextureStage.getDefault(), 0, 1)
+    
+
+    

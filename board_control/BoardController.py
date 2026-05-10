@@ -9,7 +9,7 @@ from panda3d.core import NodePath
 from board_control.BoardView import BoardView
 from core.board import Board
 from core.cell import Cell
-
+from typing import Any
 
 @dataclass
 class BoardParameters:
@@ -41,11 +41,16 @@ class BoardController:
         cell_size: float,
     ) -> None:
         self.board: Board = Board(width, height, num_mines)
-        self.view: BoardView = BoardView(loader, self.board, render, cell_size)
+        self.view: BoardView = BoardView(loader, render, cell_size)
 
     def build_board(self, x0: int = 0, y0: int = 0) -> None:
         """отрисовка поля"""
-        self.view.create_board(x0, y0)
+        self.view.create_board(
+            width=self.board.width,
+            height=self.board.height,
+            x0=x0,
+            y0=y0,
+        )
 
     def _event(self, func: Callable[[int, int], None], x: int, y: int) -> None:
         """вспомогательная функция для обработки событий"""
@@ -100,3 +105,48 @@ class BoardController:
                 now = self._visible_state(self.board.cells[x][y])
                 if now != before[x][y]:
                     self.view.update_cell(x, y, now)
+
+
+
+
+    def apply_server_board(self, board_payload: dict[str, Any]) -> ActionResult:
+        """
+        Multiplayer-обновление.
+        """
+
+        rows = board_payload["rows"]
+
+        for y, row in enumerate(rows):
+            for x, cell_payload in enumerate(row):
+                visual_state = self._server_cell_to_visual_state(cell_payload)
+                self.view.update_cell(x, y, visual_state)
+
+        self.board.game_over = bool(board_payload.get("game_over", False))
+        self.board.won = bool(board_payload.get("won", False))
+
+        return ActionResult(
+            game_over=self.board.game_over,
+            won=self.board.won,
+        )
+
+
+    def _server_cell_to_visual_state(self, cell_payload: dict[str, Any]) -> str | int:
+        state = cell_payload.get("state")
+        value = cell_payload.get("value")
+
+        if state == "closed":
+            return "closed"
+
+        if state == "flag":
+            return "flag"
+
+        if state == "empty":
+            return "empty"
+
+        if state == "number":
+            return int(value)
+
+        if state == "mine":
+            return "bomb"
+
+        return "closed"
