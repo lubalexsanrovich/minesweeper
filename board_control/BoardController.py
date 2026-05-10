@@ -69,12 +69,13 @@ class BoardController:
                 self.board.cells[x][y].is_revealed = True
         self._sync_difference(before)
 
+
     def toggle_flag(self, x: int, y: int) -> None:
         """поставить флажок"""
         self._event(self.board.toggle_flag, x, y)
 
     def _visible_state(self, cell: Cell) -> str | int:
-        """вспомогательная функция, возвращающая текущее визуальное состояние клекти"""
+        """вспомогательная функция, возвращающая текущее визуальное состояние клетки"""
         if cell.is_flagged:
             return "flag"
         if not cell.is_revealed:

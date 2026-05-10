@@ -28,6 +28,7 @@ class BoardView:
         self.cell_nodes: list[list[NodePath]] = []
 
         self.node_textures: dict[int | str, Texture] = {
+            "closed": self.loader.loadTexture("assets/textures/closed.jpg"),
             1: self.loader.loadTexture("assets/textures/1.png"),
             2: self.loader.loadTexture("assets/textures/2.png"),
             3: self.loader.loadTexture("assets/textures/3.png"),
@@ -40,7 +41,7 @@ class BoardView:
             "empty": self.loader.loadTexture("assets/textures/empty.png"),
             "flag": self.loader.loadTexture("assets/textures/flag.jpg"),
         }
-        self.hidden_texture: Texture = self.loader.loadTexture("assets/textures/hiden.jpg")
+        self.hidden_texture: Texture = self.loader.loadTexture("assets/textures/closed.jpg")
 
     def create_board(self, x0: int, y0: int) -> None:
         """ Создает клетки поля в зависимости от переданных координат начала поля """

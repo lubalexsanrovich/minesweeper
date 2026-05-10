@@ -11,6 +11,13 @@ from .player import Player
 from board_control.BoardController import ActionResult, BoardController
 from direct.gui.DirectGui import *
 from .gui import GUI
+from scene_runtime.pines2_scene import Pines2BakedScene
+
+from pathlib import Path
+
+import simplepbr
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
 
 class App(ShowBase):
 
@@ -22,8 +29,8 @@ class App(ShowBase):
 
     def __init__(self) -> None:
         super().__init__()
+        simplepbr.init()
         self.disableMouse()
-
         self._game_started: bool = False
         self._GUI_manager: GUI = GUI(self)
         self._GUI_manager.start_menu()
@@ -31,10 +38,10 @@ class App(ShowBase):
     
     def _start_game(self) -> None:
         """инициализация игры после нажатия кнопки 'Начать игру'"""
+        self.game_root = self.render.attachNewNode("game_root")
         self.props.setCursorHidden(True)
         self.win.requestProperties(self.props)
         self._GUI_manager.clean_menu()
-        self.input_enabled = True
         self._setup_scene()
         self._setup_player()
         self._setup_board()
@@ -45,17 +52,33 @@ class App(ShowBase):
         self.taskMgr.add(self.update, "update")
 
     def _setup_scene(self) -> None:
-        """отрисовка сцены"""
-        self.scene = self.loader.loadModel("models/environment")
-        self.scene.reparentTo(self.render)
-        self.scene.setScale(0.25, 0.25, 0.25)
-        self.scene.setPos(-8, 42, 0)
+        """Загружает запечённую Unity-сцену.
+        """
+        export_dir = Path("assets/scene_baked_export")
+        if (export_dir / "scene_baked.json").exists():
+            self.pines_scene = Pines2BakedScene(
+                self,
+                export_dir,
+                parent=self.game_root,
+                set_camera=False,
+                fog=True,
+                exposure=0.58,
+                emission_scale=0.12,
+                fake_light=1.0,
+                glow_intensity=0.45,
+                glow_radius_scale=0.75,
+            )
+            self.pines_scene.root.setPos(-300, -25, 0)
+            self.pines_scene.root.setScale(2.25)
+            return
+
+
 
     def _setup_player(self) -> None:
         """создание игрока"""
         self.player: Player = Player(
             self.loader,
-            self.render,
+            self.game_root,
             "models/panda.egg",
             x=0,
             y=0,
@@ -66,13 +89,14 @@ class App(ShowBase):
         """создание поля"""
         self.board_controller: BoardController = BoardController(
             self.loader,
-            self.render,
+            self.game_root,
             16,
             16,
             40,
-            cell_size=2,
+            cell_size=0.75,
         )
-        self.board_controller.build_board(x0=-8, y0=-8)
+        self.board_controller.build_board(x0=-10, y0=5)
+        self.board_controller.view.nodePath.setZ(0.5)
 
     def _setup_camera(self) -> None:
         """создание обработчика камеры"""
@@ -116,7 +140,6 @@ class App(ShowBase):
         self.win.requestProperties(self.props)
 
     def left_click(self) -> None:
-        print("left click")
         coords = self.mouse_picker.pick_cell()
         if not coords:
             return
@@ -126,7 +149,6 @@ class App(ShowBase):
             self.manage_end(result)
 
     def right_click(self) -> None:
-        print("right click")
         coords = self.mouse_picker.pick_cell()
         if coords:
             self.board_controller.toggle_flag(*coords)
@@ -176,11 +198,40 @@ class App(ShowBase):
         else:
             cam_forward, cam_right = self.camera_inst.get_ground_basis()
             self.player.move_third_person(x, y, dt, cam_forward, cam_right, run)
+    
+    def destroy_game(self) -> None:
+        self.taskMgr.remove("update")
+
+        self._ignore_input()
+
+        if hasattr(self, "mouse_picker") and hasattr(self.mouse_picker, "picker_nodePath"):
+            if not self.mouse_picker.picker_nodePath.isEmpty():
+                self.mouse_picker.picker_nodePath.removeNode()
+
+        if hasattr(self, "camera"):
+            self.camera.reparentTo(self.render)
+            self.camera.setPos(0, 0, 0)
+            self.camera.setHpr(0, 0, 0)
+
+        if hasattr(self, "game_root") and not self.game_root.isEmpty():
+            self.game_root.removeNode()
+
+        self._game_started = False
 
     def manage_end(self, result: ActionResult) -> None:
         """обработка конца игры (победа/поражение)"""
         self.input_enabled = False
         self.board_controller.reveal_all()
+    
+    def _ignore_input(self):
+        self.ignore("mouse1")
+        self.ignore("mouse3")
+        self.ignore("wheel_up")
+        self.ignore("wheel_down")
+        self.ignore("v")
+        self.ignore("escape")
+        self.input_enabled = False
+
 
     def quit_game(self) -> None:
         """выход из игры"""

@@ -51,10 +51,16 @@ class MousePicker:
             return None
 
         self.pickQueue.sortEntries()
-        picked = self.pickQueue.getEntry(0).getIntoNodePath()
-
+        picked = self.pickQueue.getEntry(0)
+        hit_pos = picked.getSurfacePoint(self.app.game_root)
+        cam_pos = self.app.camera.getPos(self.app.game_root)
+        max_dist = 4.5
+        picked = picked.getIntoNodePath()
         tagged = picked.findNetTag("cell_x")
         if tagged.isEmpty():
             return None
-
+        
+        if (hit_pos - cam_pos).length() > max_dist:
+            return None
+        
         return int(tagged.getTag("cell_x")), int(tagged.getTag("cell_y"))
