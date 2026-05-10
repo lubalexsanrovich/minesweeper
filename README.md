@@ -29,7 +29,7 @@ https://github.com/lubalexsanrovich/minesweeper
 
 ## Используемые библиотеки
 - **Panda3D** — 3D-движок.
-- **FASTAPI и websockets** — сетевая синхронизация.
+- **FASTAPI + uvicorn + websockets** — сетевая синхронизация.
 - **pytest** — тестирование.
 - **cProfile** + **snakeviz** — профилирование.
 
