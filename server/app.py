@@ -95,16 +95,16 @@ async def game_websocket(
         }
     )
 
-    await session.send_to_player(player_id, session.make_state_payload())
+    await session.broadcast(session.make_state_payload())
 
     try:
-        while True:
-            payload = await websocket.receive_json()
-            response = await session.apply_action(player_id, payload)
-            if response["type"] == "error":
-                await session.send_to_player(player_id, response)
-            else:
-                await session.broadcast(response)
+        payload = await websocket.receive_json()
+        response = await session.apply_action(player_id, payload)
+
+        if response["type"] == "error":
+            await session.send_to_player(player_id, response)
+        else:
+            await session.broadcast(session.make_state_payload())
     except WebSocketDisconnect:
         session.remove_player(player_id)
         await session.broadcast(
