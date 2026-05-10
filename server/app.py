@@ -63,50 +63,69 @@ async def game_websocket(
 ) -> None:
     code = game_code.upper()
     session = manager.get_game(code)
+
     if not session:
+        print(f"[WebSocket] Reject: game {code} not found")
         await websocket.close(code=1008, reason="Game not found")
         return
+
+    print(
+        f"[WebSocket] Join request: game={code}, "
+        f"players={len(session.players)}/{session.max_players}"
+    )
+
     if session.is_full():
+        print(f"[WebSocket] Reject: game {code} is full")
         await websocket.close(code=1008, reason="Game is full")
         return
+
     await websocket.accept()
+
     try:
         player_id = await session.add_player(websocket, player_name)
     except RuntimeError as error:
         await websocket.close(code=1008, reason=str(error))
         return
 
-    await session.send_to_player(
-        player_id,
-        {
-            "type": "joined",
-            "game_code": code,
-            "player_id": player_id,
-        },
-    )
-
-    await session.broadcast(
-        {
-            "type": "player_joined",
-            "game_code": code,
-            "player_id": player_id,
-            "player_name": player_name,
-            "players": session.get_players_payload(),
-        }
-    )
-
-    await session.broadcast(session.make_state_payload())
-
     try:
-        payload = await websocket.receive_json()
-        response = await session.apply_action(player_id, payload)
+        await session.send_to_player(
+            player_id,
+            {
+                "type": "joined",
+                "game_code": code,
+                "player_id": player_id,
+            },
+        )
 
-        if response["type"] == "error":
-            await session.send_to_player(player_id, response)
-        else:
-            await session.broadcast(session.make_state_payload())
+        await session.broadcast(
+            {
+                "type": "player_joined",
+                "game_code": code,
+                "player_id": player_id,
+                "player_name": player_name,
+                "players": session.get_players_payload(),
+            }
+        )
+
+        await session.broadcast(session.make_state_payload())
+
+        while True:
+            payload = await websocket.receive_json()
+            print(f"[WebSocket] Action from {player_id}: {payload}")
+
+            response = await session.apply_action(player_id, payload)
+
+            if response["type"] == "error":
+                await session.send_to_player(player_id, response)
+            else:
+                await session.broadcast(session.make_state_payload())
+
     except WebSocketDisconnect:
+        print(f"[WebSocket] Player disconnected: {player_id}")
+
+    finally:
         session.remove_player(player_id)
+
         await session.broadcast(
             {
                 "type": "player_left",
