@@ -135,6 +135,8 @@ class MultiplayerController:
             print(f"[Multiplayer] Network error: {message.get('message')}")
             self.enabled = False
 
+        elif message_type == "player_eliminated":
+            print(f"[Multiplayer] Player {message.get("'player_id")} is eliminated. Current kolichestvo (mne len pisat na english pomogite) of active players: {message.get("remaining_active_players")}")
         else:
             print(f"[Multiplayer] Unknown message: {message}")
 

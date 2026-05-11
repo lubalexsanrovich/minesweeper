@@ -209,7 +209,7 @@ class GUI:
             scale=0.07,
             pos=(-0.55, 0, -0.15),
             frameSize=button_frame,
-            command=lambda : self.app._start_game("casual"),
+            command=lambda : self.app._start_game("standard"),
         )
 
         self.casual_label = DirectLabel(

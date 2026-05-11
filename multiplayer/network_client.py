@@ -44,7 +44,7 @@ class NetworkClient:
         height: int,
         mine_count: int,
         max_players: int,
-        game_mode: str = "casual",
+        game_mode: str = "standard",
     ) -> str:
         """Создает новую комнату на сервере и возвращает ее код."""
         payload = {
@@ -52,7 +52,7 @@ class NetworkClient:
             "height": height,
             "mine_count": mine_count,
             "max_players": max_players,
-            "game_mode": game_mode,
+            "mode": game_mode,
         }
 
         body = json.dumps(payload).encode("utf-8")
