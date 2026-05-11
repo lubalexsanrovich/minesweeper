@@ -3,7 +3,7 @@ from __future__ import annotations
 from direct.showbase.Loader import Loader
 from panda3d.core import BitMask32, NodePath, Texture, TextureStage
 
-from core.board import Board
+
 
 
 class BoardView:
@@ -16,37 +16,39 @@ class BoardView:
     def __init__(
         self,
         loader: Loader,
-        board: Board,
         render: NodePath,
         cell_size: float,
     ) -> None:
         self.loader: Loader = loader
-        self.board: Board = board
         self.render: NodePath = render
         self.cell_size: float = cell_size
         self.nodePath: NodePath = self.render.attachNewNode("board")
         self.cell_nodes: list[list[NodePath]] = []
 
         self.node_textures: dict[int | str, Texture] = {
-            1: self.loader.loadTexture("assets/1.png"),
-            2: self.loader.loadTexture("assets/2.png"),
-            3: self.loader.loadTexture("assets/3.png"),
-            4: self.loader.loadTexture("assets/4.png"),
-            5: self.loader.loadTexture("assets/5.png"),
-            6: self.loader.loadTexture("assets/6.png"),
-            7: self.loader.loadTexture("assets/7.png"),
-            8: self.loader.loadTexture("assets/8.png"),
-            "bomb": self.loader.loadTexture("assets/bomb.jpg"),
-            "empty": self.loader.loadTexture("assets/empty.png"),
-            "flag": self.loader.loadTexture("assets/flag.jpg"),
+            "closed": self.loader.loadTexture("assets/textures/closed.jpg"),
+            1: self.loader.loadTexture("assets/textures/1.png"),
+            2: self.loader.loadTexture("assets/textures/2.png"),
+            3: self.loader.loadTexture("assets/textures/3.png"),
+            4: self.loader.loadTexture("assets/textures/4.png"),
+            5: self.loader.loadTexture("assets/textures/5.png"),
+            6: self.loader.loadTexture("assets/textures/6.png"),
+            7: self.loader.loadTexture("assets/textures/7.png"),
+            8: self.loader.loadTexture("assets/textures/8.png"),
+            "bomb": self.loader.loadTexture("assets/textures/bomb.jpg"),
+            "empty": self.loader.loadTexture("assets/textures/empty.png"),
+            "flag": self.loader.loadTexture("assets/textures/flag.jpg"),
         }
-        self.hidden_texture: Texture = self.loader.loadTexture("assets/hiden.jpg")
+        self.hidden_texture: Texture = self.loader.loadTexture("assets/textures/closed.jpg")
 
-    def create_board(self, x0: int, y0: int) -> None:
-        """ Создает клетки поля в зависимости от переданных координат начала поля """
+    def create_board(self, width: int, height: int, x0: int = 0, y0: int = 0) -> None:
+        """Создает клетки поля в зависимости от переданных координат начала поля."""
         self.cell_nodes = [
-            [self._create_cell(bx, by, x0 + bx, y0 + by) for by in range(self.board.height)]
-            for bx in range(self.board.width)
+            [
+                self._create_cell(bx, by, x0 + bx, y0 + by)
+                for by in range(height)
+            ]
+            for bx in range(width)
         ]
 
     def _create_cell(self, bx: int, by: int, wx: int, wy: int) -> NodePath:
@@ -77,3 +79,6 @@ class BoardView:
             node.setTexture(tex, 1)
             node.setTexScale(TextureStage.getDefault(), 1, -1)
             node.setTexOffset(TextureStage.getDefault(), 0, 1)
+    
+
+    

@@ -4,7 +4,10 @@ import random
 from collections import deque
 
 from core.cell import Cell
+<<<<<<< HEAD
 from core.results import ProbeResult, RevealResult, ScanResult
+=======
+>>>>>>> caacad5576951b75414350b61a9e547b8025e7bd
 
 
 class Board:
@@ -100,7 +103,7 @@ class Board:
 
         return True
 
-    def apply_basic_rules(self, revealed, flagged) -> bool:
+    def apply_basic_rules(self, revealed, flagged) -> bool | None:
         progress = False
 
         for x in range(self.width):
