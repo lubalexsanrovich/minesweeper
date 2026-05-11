@@ -114,7 +114,7 @@ class BoardController:
         Multiplayer-обновление.
         """
 
-        rows = board_payload["rows"]
+        rows = board_payload["cells"]
 
         for y, row in enumerate(rows):
             for x, cell_payload in enumerate(row):

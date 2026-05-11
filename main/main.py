@@ -96,7 +96,7 @@ class App(ShowBase):
         server_ip = server_ip.strip()
 
         if not server_ip:
-            print("[Coop] Empty server IP")
+            print("[Multiplayer] Empty server IP")
             return
 
         if server_ip.startswith("http://") or server_ip.startswith("https://"):
@@ -104,7 +104,7 @@ class App(ShowBase):
         else:
             self.server_url = f"http://{server_ip}:8000"
 
-        print(f"[Coop] Server URL set to: {self.server_url}")
+        print(f"[Multiplayer] Server URL set to: {self.server_url}")
 
     def _stop_local_server(self) -> None:
         """Останавливает локальный сервер, если он был запущен приложением."""
@@ -124,7 +124,7 @@ class App(ShowBase):
     def _start_game(self, game_mode: str | None = None) -> None:
         """
         None      -> singleplayer
-        "casual"  -> создать coop-комнату casual
+        "standard"  -> создать coop-комнату standard
         "minmax"  -> создать coop-комнату minmax
         """
 
@@ -143,7 +143,7 @@ class App(ShowBase):
         """
 
         if not self._ensure_server_running():
-            print("[Coop] Cannot create room: server is not running")
+            print("[Multiplayer] Cannot create room: server is not running")
             return
 
         self._start_game_world(is_coop=True)
@@ -163,8 +163,8 @@ class App(ShowBase):
             game_mode=game_mode,
         )
 
-        print(f"[Coop] Created room: {self.room_code}")
-        print(f"[Coop] Game mode: {game_mode}")
+        print(f"[Multiplayer] Created room: {self.room_code}")
+        print(f"[Multiplayer] Game mode: {game_mode}")
 
     def _join_coop_game(
         self,
@@ -182,7 +182,7 @@ class App(ShowBase):
         game_code = game_code.strip().upper()
 
         if not game_code:
-            print("[Coop] Empty game code")
+            print("[Multiplayer] Empty game code")
             return
 
         self._start_game_world(is_coop=True)
@@ -200,8 +200,8 @@ class App(ShowBase):
 
         self.room_code = game_code
 
-        print(f"[Coop] Joining room: {self.room_code}")
-        print(f"[Coop] Server: {self.server_url}")
+        print(f"[Multiplayer] Joining room: {self.room_code}")
+        print(f"[Multiplayer] Server: {self.server_url}")
 
     def _start_game_world(self, *, is_coop: bool) -> None:
         """
