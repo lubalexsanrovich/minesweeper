@@ -306,7 +306,7 @@ class App(ShowBase):
         self.accept("escape", self._GUI_manager.show_pause_menu)
         self.accept("h", lambda: self.use_hint("scanner"))
         self.accept("j", lambda: self.use_hint("retro"))
-        self.accept("k", self.use_shovel_hint)
+        self.accept("k", lambda: self.use_hint("shovel"))
 
     def _setup_window(self) -> None:
         """настройка окна"""
