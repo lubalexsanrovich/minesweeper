@@ -36,6 +36,7 @@ class NetworkClient:
         self.connected: bool = False
         self.game_code: str | None = None
         self.player_id: str | None = None
+        self.websocket: Any | None = None
 
     def create_game(
         self,
@@ -102,7 +103,8 @@ class NetworkClient:
         """
 
         try:
-            async with websockets.connect(url) as websocket:
+            async with websockets.connect(url, open_timeout=10) as websocket:
+                self.websocket = websocket
                 self.connected = True
 
                 receiver = asyncio.create_task(self._receive_loop(websocket))
@@ -126,6 +128,8 @@ class NetworkClient:
 
         finally:
             self.connected = False
+            self.websocket = None
+            self.game_code = None
 
     async def _receive_loop(self, websocket: Any) -> None:
         """
@@ -194,4 +198,5 @@ class NetworkClient:
 
     def disconnect(self) -> None:
         """Запрашивает закрытие WebSocket-соединения."""
-        self.outgoing.put(None)
+        if self.websocket is not None:
+            self.outgoing.put(None) 
