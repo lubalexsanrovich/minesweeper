@@ -403,6 +403,7 @@ class App(ShowBase):
         self.taskMgr.remove("update")
 
         if self.multiplayer is not None:
+            self._stop_local_server()
             self.multiplayer.destroy()
             self.multiplayer = None
 
