@@ -371,7 +371,6 @@ class GUI:
         """Возвращает игрока из игры в стартовое меню."""
         self.is_on = False
         self.clean_menu()
-        self.app.destroy_game()
         self.current_stage = "start_menu"
         self.start_menu()
     

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+
 from typing import Any
 
 from direct.showbase.ShowBase import ShowBase
@@ -91,30 +92,30 @@ class App(ShowBase):
         print("[Server] Failed to start server")
         return False
     
-    def _set_server_url_from_ip(self, server_ip: str) -> None:
-        """Обновляет server_url по IP-адресу хоста."""
-        server_ip = server_ip.strip()
+    # def _set_server_url_from_ip(self, server_ip: str) -> None:
+    #     """Обновляет server_url по IP-адресу хоста."""
+    #     server_ip = server_ip.strip()
 
-        if not server_ip:
-            print("[Multiplayer] Empty server IP")
-            return
+    #     if not server_ip:
+    #         print("[Multiplayer] Empty server IP")
+    #         return
 
-        if server_ip.startswith("http://") or server_ip.startswith("https://"):
-            self.server_url = server_ip.rstrip("/")
-        else:
-            self.server_url = f"http://{server_ip}:8000"
+    #     if server_ip.startswith("http://") or server_ip.startswith("https://"):
+    #         self.server_url = server_ip.rstrip("/")
+    #     else:
+    #         self.server_url = f"http://{server_ip}:8000"
 
-        print(f"[Multiplayer] Server URL set to: {self.server_url}")
+    #     print(f"[Multiplayer] Server URL set to: {self.server_url}")
 
     def _stop_local_server(self) -> None:
         """Останавливает локальный сервер, если он был запущен приложением."""
-        print("[Server] Stopping local server...")
+        print(f"[Server] Stopping local server {self.multiplayer.network.server_url}...")
         if self.server_process is None:
             return
 
         if self.server_process.poll() is None:
             self.server_process.terminate()
-            print("[Server] Local server stopped")
+            print(f"[Server] Local server {self.multiplayer.network.server_url} stopped")
 
             try:
                 self.server_process.wait(timeout=3)
@@ -181,9 +182,12 @@ class App(ShowBase):
             print("[Multiplayer] Empty game code")
             return
 
-
+        if not server_ip:
+            print("[Multiplayer] No server IP provided, please enter server IP again")
+            return
+        
         if server_ip:
-            self._set_server_url_from_ip(server_ip)
+            self.multiplayer._change_server_url(server_ip)
 
         game_code = game_code.strip().upper()
 
@@ -406,9 +410,9 @@ class App(ShowBase):
         self.taskMgr.remove("update")
 
         if self.multiplayer is not None:
+            print("[Multiplayer] Leaving room...")
             self.multiplayer.destroy()
             self.is_coop = False
-            self.multiplayer = None
             
             time.sleep(0.1)  
             self._stop_local_server()

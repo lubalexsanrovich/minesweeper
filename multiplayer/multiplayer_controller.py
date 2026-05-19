@@ -72,6 +72,8 @@ class MultiplayerController:
 
         self.enabled = True
         self.game_code = game_code.upper()
+        print(f"[Multiplayer] Server URL: {self.network.server_url}")
+        print(f"[Multiplayer] Joining room {self.game_code} as {player_name}...")
         self.network.connect(self.game_code, player_name)
 
     def reveal_cell(self, x: int, y: int) -> None:
@@ -159,11 +161,15 @@ class MultiplayerController:
 
         if board_payload.get("won"):
             print("[Multiplayer] Won")
+    
+    def _change_server_url(self, new_url: str) -> None:
+        self.network.server_url = new_url
+        self.network._change_server_url(new_url)
 
     def destroy(self) -> None:
         self.game_code = None
         self.player_id = None
         self.players = []
-        self.server_url = "http://127.0.0.1:8000"
+        self._change_server_url("http://127.0.0.1:8000")
         self.app.taskMgr.remove(self.task_name)
         self.network.disconnect()

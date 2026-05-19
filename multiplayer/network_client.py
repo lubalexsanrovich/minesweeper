@@ -117,7 +117,7 @@ class NetworkClient:
 
                 for task in pending:
                     task.cancel()
-                    
+
                 await asyncio.gather(*pending, return_exceptions=True)
                 await asyncio.gather(*done, return_exceptions=True)
                 
@@ -198,6 +198,13 @@ class NetworkClient:
                 "x": x,
                 "y": y,
             }
+        )
+    
+    def _change_server_url(self, new_url: str) -> None:
+        """Временная функция для изменения URL сервера (например, при подключении к локальной сети)"""
+        self.server_url = new_url.rstrip("/")
+        self.websocket_url = self.server_url.replace("http://", "ws://").replace(
+            "https://", "wss://"
         )
 
     def disconnect(self) -> None:
