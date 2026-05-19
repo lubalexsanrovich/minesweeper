@@ -92,21 +92,22 @@ class App(ShowBase):
         print("[Server] Failed to start server")
         return False
     
-    # def _set_server_url_from_ip(self, server_ip: str) -> None:
-    #     """Обновляет server_url по IP-адресу хоста."""
-    #     server_ip = server_ip.strip()
+    def _set_server_url_from_ip(self, server_ip: str) -> str:
+        """Обновляет server_url по IP-адресу хоста."""
+        server_ip = server_ip.strip()
 
-    #     if not server_ip:
-    #         print("[Multiplayer] Empty server IP")
-    #         return
+        if not server_ip:
+            print("[Multiplayer] Empty server IP")
+            return
 
-    #     if server_ip.startswith("http://") or server_ip.startswith("https://"):
-    #         self.server_url = server_ip.rstrip("/")
-    #     else:
-    #         self.server_url = f"http://{server_ip}:8000"
+        if server_ip.startswith("http://") or server_ip.startswith("https://"):
+            server_ip = server_ip.rstrip("/")
+        else:
+            server_ip = f"http://{server_ip}:8000"
 
-    #     print(f"[Multiplayer] Server URL set to: {self.server_url}")
-
+        print(f"[Multiplayer] Server URL set to: {self.server_url}")
+        return server_ip
+    
     def _stop_local_server(self) -> None:
         """Останавливает локальный сервер, если он был запущен приложением."""
         print(f"[Server] Stopping local server {self.multiplayer.network.server_url}...")
@@ -187,7 +188,7 @@ class App(ShowBase):
             return
             
         game_code = game_code.strip().upper()
-
+        server_ip = self._set_server_url_from_ip(server_ip)
         self._start_game_world(is_coop=True)
         
         if self.multiplayer is not None:
@@ -199,9 +200,6 @@ class App(ShowBase):
                 server_url=server_ip,
             )
 
-
-
-
         self.multiplayer.join(
             game_code=game_code,
             player_name=player_name,
@@ -210,7 +208,7 @@ class App(ShowBase):
         self.room_code = game_code
 
         print(f"[Multiplayer] Joining room: {self.room_code}")
-        print(f"[Multiplayer] Server: {self.server_url}")
+        print(f"[Multiplayer] Server: {server_ip}")
 
     def _start_game_world(self, *, is_coop: bool) -> None:
         """
