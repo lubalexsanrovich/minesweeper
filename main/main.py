@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+
 from typing import Any
 
 from direct.showbase.ShowBase import ShowBase
@@ -91,7 +92,7 @@ class App(ShowBase):
         print("[Server] Failed to start server")
         return False
     
-    def _set_server_url_from_ip(self, server_ip: str) -> None:
+    def _set_server_url_from_ip(self, server_ip: str) -> str:
         """Обновляет server_url по IP-адресу хоста."""
         server_ip = server_ip.strip()
 
@@ -100,19 +101,22 @@ class App(ShowBase):
             return
 
         if server_ip.startswith("http://") or server_ip.startswith("https://"):
-            self.server_url = server_ip.rstrip("/")
+            server_ip = server_ip.rstrip("/")
         else:
-            self.server_url = f"http://{server_ip}:8000"
+            server_ip = f"http://{server_ip}:8000"
 
-        print(f"[Multiplayer] Server URL set to: {self.server_url}")
-
+        print(f"[Multiplayer] Server URL set to: {server_ip}")
+        return server_ip
+    
     def _stop_local_server(self) -> None:
         """Останавливает локальный сервер, если он был запущен приложением."""
+        print(f"[Server] Stopping local server {self.multiplayer.network.server_url}...")
         if self.server_process is None:
             return
 
         if self.server_process.poll() is None:
             self.server_process.terminate()
+            print(f"[Server] Local server {self.multiplayer.network.server_url} stopped")
 
             try:
                 self.server_process.wait(timeout=3)
@@ -175,23 +179,26 @@ class App(ShowBase):
         """
         Подключиться к уже существующей комнате.
         """
-
-        if server_ip:
-            self._set_server_url_from_ip(server_ip)
-
-        game_code = game_code.strip().upper()
-
         if not game_code:
             print("[Multiplayer] Empty game code")
             return
 
+        if not server_ip:
+            print("[Multiplayer] No server IP provided, please enter server IP again")
+            return
+            
+        game_code = game_code.strip().upper()
+        server_ip = self._set_server_url_from_ip(server_ip)
         self._start_game_world(is_coop=True)
-
-        self.multiplayer = MultiplayerController(
-            self,
-            self.board_controller,
-            server_url=self.server_url,
-        )
+        
+        if self.multiplayer is not None:
+            self.multiplayer._change_server_url(server_ip)
+        else:
+            self.multiplayer = MultiplayerController(
+                self,
+                self.board_controller,
+                server_url=server_ip,
+            )
 
         self.multiplayer.join(
             game_code=game_code,
@@ -199,9 +206,6 @@ class App(ShowBase):
         )
 
         self.room_code = game_code
-
-        print(f"[Multiplayer] Joining room: {self.room_code}")
-        print(f"[Multiplayer] Server: {self.server_url}")
 
     def _start_game_world(self, *, is_coop: bool) -> None:
         """
@@ -300,6 +304,9 @@ class App(ShowBase):
         self.accept("wheel_down", self.camera_inst.zoom_out)
         self.accept("v", self.camera_inst.toggle_camera_mode)
         self.accept("escape", self._GUI_manager.show_pause_menu)
+        self.accept("h", lambda: self.use_hint("scanner"))
+        self.accept("j", lambda: self.use_hint("retro"))
+        self.accept("k", lambda: self.use_hint("shovel"))
 
     def _setup_window(self) -> None:
         """настройка окна"""
@@ -349,6 +356,20 @@ class App(ShowBase):
             return
 
         self.board_controller.toggle_flag(*coords)
+    
+
+    
+    def use_hint(self, hint_type: str) -> None:
+        if not self.input_enabled or not self.is_coop:
+            return
+
+        coords = self.mouse_picker.pick_cell()
+
+        x, y = coords if coords and hint_type == "shovel" else (None, None)
+
+        if self.multiplayer is not None:
+            self.multiplayer.use_hint(hint_type, x, y)
+
 
     def update(self, task: Any) -> Any:
         """потактовое обновление"""
@@ -403,8 +424,13 @@ class App(ShowBase):
         self.taskMgr.remove("update")
 
         if self.multiplayer is not None:
+            print("[Multiplayer] Leaving room...")
             self.multiplayer.destroy()
-            self.multiplayer = None
+            self.is_coop = False
+            
+            time.sleep(0.1)  
+            self._stop_local_server()
+            
 
         self._ignore_input()
 

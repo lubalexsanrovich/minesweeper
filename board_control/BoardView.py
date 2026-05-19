@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from direct.showbase.Loader import Loader
-from panda3d.core import BitMask32, NodePath, Texture, TextureStage
+from panda3d.core import BitMask32, NodePath, Texture, TextureStage, CardMaker
 
 
 
@@ -40,6 +40,7 @@ class BoardView:
             "flag": self.loader.loadTexture("assets/textures/flag.jpg"),
         }
         self.hidden_texture: Texture = self.loader.loadTexture("assets/textures/closed.jpg")
+        self.hint_cards: dict[tuple[int, int], NodePath] = {}
 
     def create_board(self, width: int, height: int, x0: int = 0, y0: int = 0) -> None:
         """Создает клетки поля в зависимости от переданных координат начала поля."""
@@ -74,11 +75,41 @@ class BoardView:
     def update_cell(self, x: int, y: int, content: int | str) -> None:
         """ Обновление текстуры клетки в зависимости от ее состояния (открыта/закрыта/флаг) и количества мин вокруг нее """
         node = self.cell_nodes[x][y]
-        tex = self.node_textures.get(content)
-        if tex is not None:
+        tex = self.node_textures.get(content) if content != "closed" else self.hidden_texture
+        if tex:
             node.setTexture(tex, 1)
             node.setTexScale(TextureStage.getDefault(), 1, -1)
             node.setTexOffset(TextureStage.getDefault(), 0, 1)
     
+    def update_marked_cell(self, x: int, y: int, content: str) -> None:
+        """Обновление текстуры клетки для пометки ее как содержащей мину (для подсказки-сканера)"""
+
+        cell_np = self.cell_nodes[x][y]
+        texture = self.node_textures.get(content)
+
+        if texture is None:
+            print(f"[BoardView] Unknown hint texture: {content}")
+            return
+
+        cm = CardMaker(f"hint_card_{x}_{y}")
+
+        card_np = cell_np.attachNewNode(cm.generate())
+
+        card_np.setP(-90)
+        card_np.setZ(1.1)
+
+        card_np.setTexture(texture, 1)
+        card_np.setTexScale(TextureStage.getDefault(), 1, -1)
+        card_np.setTexOffset(TextureStage.getDefault(), 0, 1)
+
+        self.hint_cards[(x, y)] = card_np
+
+    def clear_all_hint_cards(self) -> None:
+        for card_np in self.hint_cards.values():
+            if not card_np.isEmpty():
+                card_np.removeNode()
+
+        self.hint_cards.clear()
+        
 
     

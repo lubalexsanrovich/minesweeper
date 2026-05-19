@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from typing import Any
 
 from direct.task import Task
@@ -36,6 +37,7 @@ class MultiplayerController:
         self.game_code: str | None = None
         self.player_id: str | None = None
         self.players: list[dict[str, str]] = []
+        self.mines: list[tuple[int, int]] = []
 
         self.app.taskMgr.add(self._poll_task, self.task_name)
 
@@ -72,6 +74,8 @@ class MultiplayerController:
 
         self.enabled = True
         self.game_code = game_code.upper()
+        print(f"[Multiplayer] Server URL: {self.network.server_url}")
+        print(f"[Multiplayer] Joining room {self.game_code} as {player_name}...")
         self.network.connect(self.game_code, player_name)
 
     def reveal_cell(self, x: int, y: int) -> None:
@@ -96,6 +100,16 @@ class MultiplayerController:
             return
 
         self.network.send_toggle_flag(x, y)
+    
+    def use_hint(self, hint_type: str, x: int | None = None, y: int | None = None) -> None:
+        """
+        Multiplayer-использование подсказки.
+        """
+
+        if not self.enabled:
+            return
+
+        self.network.send_use_hint(hint_type=hint_type, x=x, y=y)
 
     def _poll_task(self, task: Task) -> Any:
         """
@@ -134,9 +148,27 @@ class MultiplayerController:
         elif message_type == "network_error":
             print(f"[Multiplayer] Network error: {message.get('message')}")
             self.enabled = False
+            self.app.destroy_game()
 
         elif message_type == "player_eliminated":
-            print(f"[Multiplayer] Player {message.get("'player_id")} is eliminated. Current kolichestvo (mne len pisat na english pomogite) of active players: {message.get("remaining_active_players")}")
+            print(f"[Multiplayer] Player {message.get('player_id')} is eliminated. Current kolichestvo (mne len pisat na english pomogite) of active players: {message.get('remaining_active_players')}")
+        elif message_type == "hint_result" and message.get("hint_type") == "scanner":
+            self.app.taskMgr.remove("remove_hint_card_task")
+            self.mines.clear()
+            for mine in message["mines"]:
+                x = mine["x"]
+                y = mine["y"]
+                self.mines.append((x, y))
+                print(f"[Multiplayer] Scanner hint: mine detected at ({x}, {y})")
+            self.board_controller._change_cell_tex(self.mines, "bomb")
+            self.app.taskMgr.doMethodLater(
+                message.get("expires_in"),
+                self.board_controller._remove_hint_card,
+                "remove_hint_card_task",
+            )
+
+        elif message_type == "hint_result" and message.get("hint_type") != "scanner":
+            print(f"[Multiplayer] {message.get('hint_type')} hint used at ({message.get('x')}, {message.get('y')}). Result: {message.get('moves')}")
         else:
             print(f"[Multiplayer] Unknown message: {message}")
 
@@ -158,7 +190,14 @@ class MultiplayerController:
 
         if board_payload.get("won"):
             print("[Multiplayer] Won")
+    
+    def _change_server_url(self, new_url: str) -> None:
+        self.network._change_server_url(new_url)
 
     def destroy(self) -> None:
+        self.game_code = None
+        self.player_id = None
+        self.players = []
+        self._change_server_url("http://127.0.0.1:8000")
         self.app.taskMgr.remove(self.task_name)
         self.network.disconnect()
