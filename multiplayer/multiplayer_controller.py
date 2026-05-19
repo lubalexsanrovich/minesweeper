@@ -163,7 +163,6 @@ class MultiplayerController:
             print("[Multiplayer] Won")
     
     def _change_server_url(self, new_url: str) -> None:
-        self.network.server_url = new_url
         self.network._change_server_url(new_url)
 
     def destroy(self) -> None:
