@@ -186,19 +186,19 @@ class App(ShowBase):
             print("[Multiplayer] No server IP provided, please enter server IP again")
             return
         
-        if server_ip:
+        if self.multiplayer is not None:
             self.multiplayer._change_server_url(server_ip)
+        else:
+            self.multiplayer = MultiplayerController(
+                self,
+                self.board_controller,
+                server_url=server_ip,
+            )
+
 
         game_code = game_code.strip().upper()
 
-
         self._start_game_world(is_coop=True)
-
-        self.multiplayer = MultiplayerController(
-            self,
-            self.board_controller,
-            server_url=self.server_url,
-        )
 
         self.multiplayer.join(
             game_code=game_code,
