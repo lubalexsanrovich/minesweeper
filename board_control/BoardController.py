@@ -127,9 +127,10 @@ class BoardController:
             won=self.board.won,
         )
     
-    def _change_cell_tex(self, x: int, y: int, content: str) -> None:
+    def _change_cell_tex(self, cells: list[tuple[int, int]], content: str) -> None:
         """Помечает клетку как содержащую мину (для подсказки-сканера)"""
-        self.view.update_cell(x, y, content)
+        for x, y in cells:
+            self.view.update_cell(x, y, content)
 
     def _server_cell_to_visual_state(self, cell_payload: dict[str, Any]) -> str | int:
         state = cell_payload.get("state")

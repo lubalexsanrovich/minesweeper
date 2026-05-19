@@ -36,6 +36,7 @@ class MultiplayerController:
         self.game_code: str | None = None
         self.player_id: str | None = None
         self.players: list[dict[str, str]] = []
+        self.mines: list[tuple[int, int]] = []
 
         self.app.taskMgr.add(self._poll_task, self.task_name)
 
@@ -154,16 +155,18 @@ class MultiplayerController:
             for mine in message["mines"]:
                 x = mine["x"]
                 y = mine["y"]
-                self.board_controller._change_cell_tex(x, y, "bomb")
+                self.mines.append((x, y))
                 print(f"[Multiplayer] Scanner hint: mine detected at ({x}, {y})")
-                self.app.taskMgr.doMethodLater(
-                    message.get("expires_in"),
-                    lambda: self.board_controller._change_cell_tex(x, y, "closed"),
-                    "clear_board_hint",
-                )
+            self.board_controller._change_cell_tex(self.mines, "bomb")
+            self.app.taskMgr.doMethodLater(
+                message.get("expires_in"),
+                self.board_controller._change_cell_tex,
+                str(message.get("hint_type")) + f"_hint_expire_{x}_{y}",
+                extraArgs=[self.mines, "closed"],
+            )
 
         elif message_type == "hint_result" and message.get("hint_type") != "scanner":
-            print(f"[Multiplayer] {message.get('hint_type')} hint used at ({message.get('x')}, {message.get('y')}). Result: {message.get('result')}")
+            print(f"[Multiplayer] {message.get('hint_type')} hint used at ({message.get('x')}, {message.get('y')}). Result: {message.get('moves')}")
         else:
             print(f"[Multiplayer] Unknown message: {message}")
 

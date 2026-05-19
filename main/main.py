@@ -468,6 +468,7 @@ class App(ShowBase):
 
     def quit_game(self) -> None:
         """выход из игры"""
+        self._stop_local_server()
         self.userExit()
 
 
