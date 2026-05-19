@@ -11,6 +11,8 @@ from core.board import Board
 from core.cell import Cell
 from typing import Any
 
+from direct.task import Task
+
 @dataclass
 class BoardParameters:
     width: int = 16
@@ -130,7 +132,11 @@ class BoardController:
     def _change_cell_tex(self, cells: list[tuple[int, int]], content: str) -> None:
         """Помечает клетку как содержащую мину (для подсказки-сканера)"""
         for x, y in cells:
-            self.view.update_cell(x, y, content)
+            self.view.update_marked_cell(x, y, content)
+    
+    def _remove_hint_card(self, task: Task) -> None:
+        self.view.clear_all_hint_cards()
+        return task.done
 
     def _server_cell_to_visual_state(self, cell_payload: dict[str, Any]) -> str | int:
         state = cell_payload.get("state")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from typing import Any
 
 from direct.task import Task
@@ -152,6 +153,8 @@ class MultiplayerController:
         elif message_type == "player_eliminated":
             print(f"[Multiplayer] Player {message.get('player_id')} is eliminated. Current kolichestvo (mne len pisat na english pomogite) of active players: {message.get('remaining_active_players')}")
         elif message_type == "hint_result" and message.get("hint_type") == "scanner":
+            self.app.taskMgr.remove("remove_hint_card_task")
+            self.mines.clear()
             for mine in message["mines"]:
                 x = mine["x"]
                 y = mine["y"]
@@ -160,9 +163,8 @@ class MultiplayerController:
             self.board_controller._change_cell_tex(self.mines, "bomb")
             self.app.taskMgr.doMethodLater(
                 message.get("expires_in"),
-                self.board_controller._change_cell_tex,
-                str(message.get("hint_type")) + f"_hint_expire_{x}_{y}",
-                extraArgs=[self.mines, "closed"],
+                self.board_controller._remove_hint_card,
+                "remove_hint_card_task",
             )
 
         elif message_type == "hint_result" and message.get("hint_type") != "scanner":
