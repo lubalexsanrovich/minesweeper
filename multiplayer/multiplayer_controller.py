@@ -161,5 +161,9 @@ class MultiplayerController:
             print("[Multiplayer] Won")
 
     def destroy(self) -> None:
+        self.game_code = None
+        self.player_id = None
+        self.players = []
+        self.server_url = "http://127.0.0.1:8000"
         self.app.taskMgr.remove(self.task_name)
         self.network.disconnect()

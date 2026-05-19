@@ -407,7 +407,9 @@ class App(ShowBase):
 
         if self.multiplayer is not None:
             self.multiplayer.destroy()
+            self.is_coop = False
             self.multiplayer = None
+            
             time.sleep(0.1)  
             self._stop_local_server()
             
