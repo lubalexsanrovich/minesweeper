@@ -304,6 +304,9 @@ class App(ShowBase):
         self.accept("wheel_down", self.camera_inst.zoom_out)
         self.accept("v", self.camera_inst.toggle_camera_mode)
         self.accept("escape", self._GUI_manager.show_pause_menu)
+        self.accept("h", lambda: self.use_hint("scanner"))
+        self.accept("j", lambda: self.use_hint("retro"))
+        self.accept("k", self.use_shovel_hint)
 
     def _setup_window(self) -> None:
         """настройка окна"""
@@ -353,6 +356,20 @@ class App(ShowBase):
             return
 
         self.board_controller.toggle_flag(*coords)
+    
+
+    
+    def use_hint(self, hint_type: str) -> None:
+        if not self.input_enabled or not self.is_coop:
+            return
+
+        coords = self.mouse_picker.pick_cell()
+
+        x, y = coords if coords and hint_type == "shovel" else (None, None)
+
+        if self.multiplayer is not None:
+            self.multiplayer.use_hint(hint_type, x, y)
+
 
     def update(self, task: Any) -> Any:
         """потактовое обновление"""

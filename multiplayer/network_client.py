@@ -200,6 +200,24 @@ class NetworkClient:
             }
         )
     
+    def send_use_hint(
+        self,
+        hint_type: str,
+        x: int | None = None,
+        y: int | None = None,
+    ) -> None:
+        """Отправляет на сервер действие использования подсказки."""
+        payload: dict[str, Any] = {
+            "type": "use_hint",
+            "hint_type": hint_type,
+        }
+
+        if x is not None and y is not None:
+            payload["x"] = x
+            payload["y"] = y
+
+        self.outgoing.put(payload)
+    
     def _change_server_url(self, new_url: str) -> None:
         """Временная функция для изменения URL сервера (например, при подключении к локальной сети)"""
         self.server_url = new_url.rstrip("/")

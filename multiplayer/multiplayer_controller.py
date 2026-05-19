@@ -98,6 +98,16 @@ class MultiplayerController:
             return
 
         self.network.send_toggle_flag(x, y)
+    
+    def use_hint(self, hint_type: str, x: int | None = None, y: int | None = None) -> None:
+        """
+        Multiplayer-использование подсказки.
+        """
+
+        if not self.enabled:
+            return
+
+        self.network.send_use_hint(hint_type=hint_type, x=x, y=y)
 
     def _poll_task(self, task: Task) -> Any:
         """
@@ -136,10 +146,24 @@ class MultiplayerController:
         elif message_type == "network_error":
             print(f"[Multiplayer] Network error: {message.get('message')}")
             self.enabled = False
-            self.network.disconnect()
+            self.app.destroy_game()
 
         elif message_type == "player_eliminated":
-            print(f"[Multiplayer] Player {message.get("'player_id")} is eliminated. Current kolichestvo (mne len pisat na english pomogite) of active players: {message.get("remaining_active_players")}")
+            print(f"[Multiplayer] Player {message.get('player_id')} is eliminated. Current kolichestvo (mne len pisat na english pomogite) of active players: {message.get('remaining_active_players')}")
+        elif message_type == "hint_result" and message.get("hint_type") == "scanner":
+            for mine in message["mines"]:
+                x = mine["x"]
+                y = mine["y"]
+                self.board_controller._change_cell_tex(x, y, "bomb")
+                print(f"[Multiplayer] Scanner hint: mine detected at ({x}, {y})")
+                self.app.taskMgr.doMethodLater(
+                    message.get("expires_in"),
+                    lambda: self.board_controller._change_cell_tex(x, y, "closed"),
+                    "clear_board_hint",
+                )
+
+        elif message_type == "hint_result" and message.get("hint_type") != "scanner":
+            print(f"[Multiplayer] {message.get('hint_type')} hint used at ({message.get('x')}, {message.get('y')}). Result: {message.get('result')}")
         else:
             print(f"[Multiplayer] Unknown message: {message}")
 
