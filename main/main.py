@@ -105,7 +105,7 @@ class App(ShowBase):
         else:
             server_ip = f"http://{server_ip}:8000"
 
-        print(f"[Multiplayer] Server URL set to: {self.server_url}")
+        print(f"[Multiplayer] Server URL set to: {server_ip}")
         return server_ip
     
     def _stop_local_server(self) -> None:
@@ -206,9 +206,6 @@ class App(ShowBase):
         )
 
         self.room_code = game_code
-
-        print(f"[Multiplayer] Joining room: {self.room_code}")
-        print(f"[Multiplayer] Server: {server_ip}")
 
     def _start_game_world(self, *, is_coop: bool) -> None:
         """
