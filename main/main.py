@@ -108,11 +108,13 @@ class App(ShowBase):
 
     def _stop_local_server(self) -> None:
         """Останавливает локальный сервер, если он был запущен приложением."""
+        print("[Server] Stopping local server...")
         if self.server_process is None:
             return
 
         if self.server_process.poll() is None:
             self.server_process.terminate()
+            print("[Server] Local server stopped")
 
             try:
                 self.server_process.wait(timeout=3)
@@ -175,15 +177,16 @@ class App(ShowBase):
         """
         Подключиться к уже существующей комнате.
         """
+        if not game_code:
+            print("[Multiplayer] Empty game code")
+            return
+
 
         if server_ip:
             self._set_server_url_from_ip(server_ip)
 
         game_code = game_code.strip().upper()
 
-        if not game_code:
-            print("[Multiplayer] Empty game code")
-            return
 
         self._start_game_world(is_coop=True)
 
@@ -403,9 +406,11 @@ class App(ShowBase):
         self.taskMgr.remove("update")
 
         if self.multiplayer is not None:
-            self._stop_local_server()
             self.multiplayer.destroy()
             self.multiplayer = None
+            time.sleep(0.1)  
+            self._stop_local_server()
+            
 
         self._ignore_input()
 
@@ -443,7 +448,6 @@ class App(ShowBase):
 
     def quit_game(self) -> None:
         """выход из игры"""
-        self._stop_local_server()
         self.userExit()
 
 

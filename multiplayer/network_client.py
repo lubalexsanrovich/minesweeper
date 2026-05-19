@@ -117,6 +117,10 @@ class NetworkClient:
 
                 for task in pending:
                     task.cancel()
+                    
+                await asyncio.gather(*pending, return_exceptions=True)
+                await asyncio.gather(*done, return_exceptions=True)
+                
 
         except Exception as error:
             self.incoming.put(
