@@ -16,7 +16,6 @@ from scene_runtime.pines2_scene import Pines2BakedScene
 from multiplayer.multiplayer_controller import MultiplayerController
 
 from pathlib import Path
-import json
 from urllib.request import urlopen
 import subprocess
 import sys
@@ -464,6 +463,9 @@ class App(ShowBase):
         self.ignore("wheel_down")
         self.ignore("v")
         self.ignore("escape")
+        self.ignore("h")
+        self.ignore("j")
+        self.ignore("k")
         self.input_enabled = False
 
     def quit_game(self) -> None:

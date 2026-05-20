@@ -33,7 +33,7 @@ MAX_SHADER_GLOWS = 48
 def _make_glow_uniforms() -> str:
     """Создает GLSL uniform-переменные для источников свечения."""
     return "\n".join(
-        f"uniform vec4 glow_pos_range{i};\nuniform vec4 glow_color_intensity{i};"
+        f"uniform vec4 glow_pos_range{i};\nuniform vec4 glow_color_intensity{i};" # создаем переменные для позиции, радиуса, интенсивности и цвета свечения каждого источника
         for i in range(MAX_SHADER_GLOWS)
     )
 
@@ -41,11 +41,12 @@ def _make_glow_uniforms() -> str:
 def _make_glow_body() -> str:
     """Создает GLSL-код расчета свечения от всех glow-источников."""
     parts: list[str] = []
-    for i in range(MAX_SHADER_GLOWS):
+    for i in range(MAX_SHADER_GLOWS): # для каждого источника свечения добавляем код, который рассчитывает его вклад в итоговое свечение
+                                     # считаем расстояние от пикселя до источника, нормируем его по радиусу действия, применяем сглаживание и накапливаем итоговый цвет свечения с учетом интенсивности и цвета источника 
         parts.append(
             f"""
     {{
-        float d = length(world_pos - glow_pos_range{i}.xyz);
+        float d = length(world_pos - glow_pos_range{i}.xyz); 
         float range = max(glow_pos_range{i}.w, 0.001);
         float f = clamp(1.0 - d / range, 0.0, 1.0);
         f = f * f * (3.0 - 2.0 * f);
@@ -138,14 +139,14 @@ void main() {{
 
 def _make_format() -> GeomVertexFormat:
     """Создает формат вершин для запеченной геометрии сцены."""
-    arr = GeomVertexArrayFormat()
+    arr = GeomVertexArrayFormat() # создаем массив формата вершин и добавляем в него колонки для позиции, нормали, UV-координат (для текстур) и цвета с соответствующими типами данных
     arr.addColumn(InternalName.getVertex(), 3, Geom.NTFloat32, Geom.CPoint)
     arr.addColumn(InternalName.getNormal(), 3, Geom.NTFloat32, Geom.CNormal)
     arr.addColumn(InternalName.getTexcoord(), 2, Geom.NTFloat32, Geom.CTexcoord)
     arr.addColumn(InternalName.getColor(), 4, Geom.NTFloat32, Geom.CColor)
     fmt = GeomVertexFormat()
     fmt.addArray(arr)
-    return GeomVertexFormat.registerFormat(fmt)
+    return GeomVertexFormat.registerFormat(fmt) # регистрируем формат в Panda3D и возвращаем его для использования при создании GeomVertexData
 
 
 VFORMAT = _make_format()
@@ -194,10 +195,10 @@ def _read_chunk(path: Path, name: str) -> GeomNode:
     """Читает бинарный chunk сцены и превращает его в GeomNode."""
     data = path.read_bytes()
     off = 0
-    vertex_count, index_count = struct.unpack_from("<ii", data, off)
+    vertex_count, index_count = struct.unpack_from("<ii", data, off) # читаем первые 8 байт, которые содержат количество вершин и индексов в этом чанке
     off += 8
 
-    vdata = GeomVertexData(name, VFORMAT, Geom.UHStatic)
+    vdata = GeomVertexData(name, VFORMAT, Geom.UHStatic) # создаем GeomVertexData (контейнер вершин) с нашим форматом и количеством вершин. Static означает, что геометрия не будет изменяться после создания
     vdata.setNumRows(vertex_count)
     vertex_writer = GeomVertexWriter(vdata, "vertex")
     normal_writer = GeomVertexWriter(vdata, "normal")
@@ -206,14 +207,14 @@ def _read_chunk(path: Path, name: str) -> GeomNode:
 
     stride = 12 * 4
     for _ in range(vertex_count):
-        x, y, z, nx, ny, nz, u, v, r, g, b, a = struct.unpack_from("<ffffffffffff", data, off)
+        x, y, z, nx, ny, nz, u, v, r, g, b, a = struct.unpack_from("<ffffffffffff", data, off) # читаем данные одной вершины: позицию (x, y, z), нормаль (nx, ny, nz), UV-координаты (u, v) и цвет (r, g, b, a). Все данные хранятся в виде 32-битных float'ов подряд
         off += stride
         vertex_writer.addData3f(x, y, z)
         normal_writer.addData3f(nx, ny, nz)
         texcoord_writer.addData2f(u, v)
         color_writer.addData4f(r, g, b, a)
 
-    prim = GeomTriangles(Geom.UHStatic)
+    prim = GeomTriangles(Geom.UHStatic) # собираем полигоны из индексов. Каждый треугольник задается тремя индексами вершин, которые мы читаем из данных и добавляем в примитив. Static означает, что геометрия не будет изменяться после создания
     for _ in range(index_count // 3):
         i0, i1, i2 = struct.unpack_from("<iii", data, off)
         off += 12
@@ -255,10 +256,10 @@ class Pines2BakedScene:
         self.export_dir: Path = Path(export_dir)
         self.parent: NodePath = parent if parent is not None else app.render
         self.root: NodePath = self.parent.attachNewNode(root_name)
-        self.root.setShader(SCENE_SHADER, 1)
-        self.root.setAntialias(AntialiasAttrib.MAuto)
-        self.root.setDepthWrite(True)
-        self.root.setDepthTest(True)
+        self.root.setShader(SCENE_SHADER, 1) # ставим шейдер на корень = на все последующие чанки (спасибо панда)
+        self.root.setAntialias(AntialiasAttrib.MAuto) #автоматическое сглаживание для лучшего качества
+        self.root.setDepthWrite(True) # включаем запись в буфер глубины, чтобы объекты правильно перекрывали друг друга
+        self.root.setDepthTest(True) # включаем тест глубины, чтобы пиксели отбрасывались, если они находятся позади других объектов
         self.texture_cache: dict[str, Texture] = {}
         self.settings = SimpleNamespace(
             set_camera=set_camera,
@@ -273,7 +274,7 @@ class Pines2BakedScene:
         )
         self.task_name = task_name
 
-        if collision_mask is None:
+        if collision_mask is None: # это нужно для обработки коллизии, если она есть. если нет то отключаем
             collision_mask = BitMask32.allOff()
         self.root.setCollideMask(collision_mask)
 
@@ -299,13 +300,13 @@ class Pines2BakedScene:
 
         path = self.export_dir / rel
 
-        tex = self.app.loader.loadTexture(Filename.fromOsSpecific(str(path)))
+        tex = self.app.loader.loadTexture(Filename.fromOsSpecific(str(path))) # загружаем текстуру и меняем путь на абсолютный, так как Panda3D требует именно его. fromOsSpecific позволяет корректно обработать пути в Windows, Linux и MacOS
         if tex:
-            tex.setWrapU(Texture.WMRepeat)
+            tex.setWrapU(Texture.WMRepeat) # устанавливаем режим повторения текстуры по горизонтали и вертикали, чтобы текстура могла повторяться на больших поверхностях без растягивания
             tex.setWrapV(Texture.WMRepeat)
-            tex.setMinfilter(Texture.FTLinearMipmapLinear)
-            tex.setMagfilter(Texture.FTLinear)
-            tex.setAnisotropicDegree(16)
+            tex.setMinfilter(Texture.FTLinearMipmapLinear) # устанавливаем фильтрацию текстуры для улучшения качества при уменьшении размера (мипмаппинг) и увеличении размера (линеар)
+            tex.setMagfilter(Texture.FTLinear) 
+            tex.setAnisotropicDegree(16) # включаем анизотропную фильтрацию для улучшения качества текстуры на больших углах обзора
             self.texture_cache[rel] = tex
         return tex
 
@@ -333,18 +334,18 @@ class Pines2BakedScene:
             np.setShaderInput(
                 "material_color",
                 _color4(mat.get("color"), (1, 1, 1, 1), clamp_hdr=True),
-            )
-            np.setShaderInput("emission_color", _scaled_emission(mat.get("emission"), self.settings.emission_scale))
-            np.setShaderInput("alpha_cutoff", float(mat.get("alphaCutoff", 0.5)))
-            np.setShaderInput("alpha_clip", 1.0 if mat.get("alphaClip") else 0.0)
-            np.setShaderInput("exposure", float(self.settings.exposure))
+            ) # передаем в шейдер базовый цвет материала, который может быть использован для окрашивания текстуры или для однотонных материалов. clamp_hdr=True означает, что мы ограничиваем цвет значениями от 0 до 1
+            np.setShaderInput("emission_color", _scaled_emission(mat.get("emission"), self.settings.emission_scale)) # для свечения
+            np.setShaderInput("alpha_cutoff", float(mat.get("alphaCutoff", 0.5))) # для правильной текстуры (отсекаем лишнее)
+            np.setShaderInput("alpha_clip", 1.0 if mat.get("alphaClip") else 0.0) # передается надо ли отсекать что-то или нет
+            np.setShaderInput("exposure", float(self.settings.exposure)) # для настройки яркости сцены
             if mat.get("transparent"):
-                np.setTransparency(TransparencyAttrib.MAlpha, 1)
-            if is_terrain or mat.get("twoSided") or self.settings.two_sided:
+                np.setTransparency(TransparencyAttrib.MAlpha, 1) # включаем режим прозрачности для материалов, которые его требуют
+            if is_terrain or mat.get("twoSided") or self.settings.two_sided: # для тех моделей, которые должны быть двусторонними (например трава или листья), отключаем отсечение задних граней, чтобы они были видны с обеих сторон
                 np.setTwoSided(True)
 
 
-    def _task_update(self, task: Task) -> Any:
+    def _task_update(self, task: Task) -> Any: 
         """Обновляет shader input'ы каждый кадр."""
         self.update_shader_inputs()
         return task.cont
