@@ -1,0 +1,873 @@
+{
+    "exporterVersion": "panda-baked-emergency-v3-glow",
+    "unityVersion": "2022.3.62f3",
+    "sceneName": "Demo_Scene_Pines_2",
+    "colorSpace": "Linear",
+    "fog": {
+        "enabled": true,
+        "color": {
+            "r": 0.7452830076217651,
+            "g": 0.5983573198318481,
+            "b": 0.41834282875061037,
+            "a": 1.0
+        },
+        "density": 0.014999999664723874,
+        "mode": "ExponentialSquared",
+        "startDistance": 85.0,
+        "endDistance": 150.0
+    },
+    "camera": {
+        "position": {
+            "x": 167.97999572753907,
+            "y": 7.880000114440918,
+            "z": 3.490000009536743
+        },
+        "forward": {
+            "x": -0.9997580051422119,
+            "y": -0.021777966991066934,
+            "z": 0.003090287558734417
+        },
+        "up": {
+            "x": 0.003129760269075632,
+            "y": -0.001778647769242525,
+            "z": 0.9999935030937195
+        },
+        "fov": 37.921199798583987,
+        "nearClip": 0.30000001192092898,
+        "farClip": 1000.0,
+        "name": "Camera"
+    },
+    "materials": [
+        {
+            "id": "mat_29048_TFF_Atlas_Billboards_1A_D",
+            "name": "TFF_Atlas_Billboards_1A_D",
+            "shader": "Toon/TFF_CustomToonVegetation",
+            "texture": "textures/TFF_Atlas_Billboards_1A_D_47020.png",
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29074_TFF_Atlas_Vegetation_1A_D",
+            "name": "TFF_Atlas_Vegetation_1A_D",
+            "shader": "Toon/TFF_CustomToonVegetation",
+            "texture": "textures/TFF_Atlas_Vegetation_1A_D_Source_47024.png",
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29082_TFF_Flower_Patch_01D",
+            "name": "TFF_Flower_Patch_01D",
+            "shader": "Toon/TFF_CustomGrass",
+            "texture": "textures/TFF_Flower_Patch_01B_47040.png",
+            "color": {
+                "r": 1.0,
+                "g": 0.1650942862033844,
+                "b": 0.46327489614486697,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29160_TFF_Flower_Patch_01E",
+            "name": "TFF_Flower_Patch_01E",
+            "shader": "Toon/TFF_CustomGrass",
+            "texture": "textures/TFF_Flower_Patch_01C_47036.png",
+            "color": {
+                "r": 0.7372549772262573,
+                "g": 0.5689112544059753,
+                "b": 0.2862744629383087,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29176_TFF_Flower_Patch_02A",
+            "name": "TFF_Flower_Patch_02A",
+            "shader": "Toon/TFF_CustomGrass",
+            "texture": "textures/TFF_Flower_Patch_02A_47034.png",
+            "color": {
+                "r": 1.0,
+                "g": 0.6650943756103516,
+                "b": 0.6882527470588684,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29170_TFF_Grass_Patch_01A",
+            "name": "TFF_Grass_Patch_01A",
+            "shader": "Toon/TFF_CustomGrass",
+            "texture": "textures/TFF_Grass_Patch_01A_47016.png",
+            "color": {
+                "r": 0.4790158271789551,
+                "g": 0.5283018946647644,
+                "b": 0.30651476979255679,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29122_TFF_Grass_Patch_01B",
+            "name": "TFF_Grass_Patch_01B",
+            "shader": "Toon/TFF_CustomGrass",
+            "texture": "textures/TFF_Grass_Patch_01A_47016.png",
+            "color": {
+                "r": 0.650943398475647,
+                "g": 0.5899523496627808,
+                "b": 0.35924702882766726,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29172_TFF_Grass_Patch_01C",
+            "name": "TFF_Grass_Patch_01C",
+            "shader": "Toon/TFF_CustomGrass",
+            "texture": "textures/TFF_Grass_Patch_01A_47016.png",
+            "color": {
+                "r": 0.36142751574516299,
+                "g": 0.5849056243896484,
+                "b": 0.49178963899612429,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29154_TFF_Atlas_1A_D",
+            "name": "TFF_Atlas_1A_D",
+            "shader": "Toon/TFF_CustomToonOutline",
+            "texture": "textures/TFF_Atlas_1A_D_Source_46566.png",
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        },
+        {
+            "id": "mat_29102_TFF_Atlas_Lights_1A_D",
+            "name": "TFF_Atlas_Lights_1A_D",
+            "shader": "Universal Render Pipeline/Particles/Unlit",
+            "texture": "textures/TFF_Atlas_Lights_1A_D_47038.png",
+            "color": {
+                "r": 1.4980392456054688,
+                "g": 1.4980392456054688,
+                "b": 1.4980392456054688,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 2.4330499172210695,
+                "g": 2.4330499172210695,
+                "b": 2.4330499172210695,
+                "a": 1.0
+            },
+            "alphaCutoff": 0.5,
+            "alphaClip": true,
+            "transparent": true,
+            "twoSided": true,
+            "renderQueue": 3000
+        },
+        {
+            "id": "mat_terrain_baked",
+            "name": "Terrain_Baked_Diffuse",
+            "shader": "Panda/BakedTerrain",
+            "texture": "textures/terrain_baked_diffuse.png",
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "emission": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            },
+            "alphaCutoff": 0.0,
+            "alphaClip": false,
+            "transparent": false,
+            "twoSided": true,
+            "renderQueue": 2000
+        }
+    ],
+    "chunks": [
+        {
+            "file": "chunks/TFF_Grass_Patch_01A_000.bin",
+            "materialId": "mat_29170_TFF_Grass_Patch_01A",
+            "vertexCount": 450112,
+            "indexCount": 675168,
+            "name": "TFF_Grass_Patch_01A",
+            "boundsMin": {
+                "x": 64.85093688964844,
+                "y": -16.82976722717285,
+                "z": -0.13437771797180177
+            },
+            "boundsMax": {
+                "x": 174.13739013671876,
+                "y": 56.42498779296875,
+                "z": 3.935971975326538
+            }
+        },
+        {
+            "file": "chunks/TFF_Atlas_Vegetation_1A_D_000.bin",
+            "materialId": "mat_29074_TFF_Atlas_Vegetation_1A_D",
+            "vertexCount": 451640,
+            "indexCount": 950412,
+            "name": "TFF_Atlas_Vegetation_1A_D",
+            "boundsMin": {
+                "x": 36.027099609375,
+                "y": -23.96609115600586,
+                "z": -3.5056324005126955
+            },
+            "boundsMax": {
+                "x": 183.189453125,
+                "y": 68.01582336425781,
+                "z": 35.128143310546878
+            }
+        },
+        {
+            "file": "chunks/terrain_baked_mesh.bin",
+            "materialId": "mat_terrain_baked",
+            "vertexCount": 263169,
+            "indexCount": 1572864,
+            "name": "Unity Terrain Baked",
+            "boundsMin": {
+                "x": -400.0,
+                "y": -398.9700012207031,
+                "z": 0.0
+            },
+            "boundsMax": {
+                "x": 400.0,
+                "y": 401.0299987792969,
+                "z": 40.035404205322269
+            }
+        },
+        {
+            "file": "chunks/TFF_Atlas_Billboards_1A_D_000.bin",
+            "materialId": "mat_29048_TFF_Atlas_Billboards_1A_D",
+            "vertexCount": 3488,
+            "indexCount": 5232,
+            "name": "TFF_Atlas_Billboards_1A_D",
+            "boundsMin": {
+                "x": -14.356765747070313,
+                "y": -43.881988525390628,
+                "z": -0.5140285491943359
+            },
+            "boundsMax": {
+                "x": 199.63739013671876,
+                "y": 90.7734375,
+                "z": 44.787330627441409
+            }
+        },
+        {
+            "file": "chunks/TFF_Atlas_Vegetation_1A_D_001.bin",
+            "materialId": "mat_29074_TFF_Atlas_Vegetation_1A_D",
+            "vertexCount": 85094,
+            "indexCount": 198132,
+            "name": "TFF_Atlas_Vegetation_1A_D",
+            "boundsMin": {
+                "x": 40.861541748046878,
+                "y": -0.5896072387695313,
+                "z": 0.3553609848022461
+            },
+            "boundsMax": {
+                "x": 171.53140258789063,
+                "y": 62.18677520751953,
+                "z": 19.229141235351564
+            }
+        },
+        {
+            "file": "chunks/TFF_Flower_Patch_01D_000.bin",
+            "materialId": "mat_29082_TFF_Flower_Patch_01D",
+            "vertexCount": 952,
+            "indexCount": 1428,
+            "name": "TFF_Flower_Patch_01D",
+            "boundsMin": {
+                "x": 101.36967468261719,
+                "y": 21.810306549072267,
+                "z": -0.04340168833732605
+            },
+            "boundsMax": {
+                "x": 105.65705871582031,
+                "y": 25.50384521484375,
+                "z": 0.9114352464675903
+            }
+        },
+        {
+            "file": "chunks/TFF_Flower_Patch_01E_000.bin",
+            "materialId": "mat_29160_TFF_Flower_Patch_01E",
+            "vertexCount": 2720,
+            "indexCount": 4080,
+            "name": "TFF_Flower_Patch_01E",
+            "boundsMin": {
+                "x": 112.91046142578125,
+                "y": 25.059673309326173,
+                "z": -0.1759369671344757
+            },
+            "boundsMax": {
+                "x": 117.05267333984375,
+                "y": 28.88043212890625,
+                "z": 0.9379972219467163
+            }
+        },
+        {
+            "file": "chunks/TFF_Flower_Patch_02A_000.bin",
+            "materialId": "mat_29176_TFF_Flower_Patch_02A",
+            "vertexCount": 3080,
+            "indexCount": 4620,
+            "name": "TFF_Flower_Patch_02A",
+            "boundsMin": {
+                "x": 107.99725341796875,
+                "y": 13.103801727294922,
+                "z": -0.07750856876373291
+            },
+            "boundsMax": {
+                "x": 123.51695251464844,
+                "y": 31.272464752197267,
+                "z": 2.1043972969055177
+            }
+        },
+        {
+            "file": "chunks/TFF_Grass_Patch_01A_001.bin",
+            "materialId": "mat_29170_TFF_Grass_Patch_01A",
+            "vertexCount": 19344,
+            "indexCount": 29016,
+            "name": "TFF_Grass_Patch_01A",
+            "boundsMin": {
+                "x": 69.00137329101563,
+                "y": -11.134803771972657,
+                "z": -0.03292727470397949
+            },
+            "boundsMax": {
+                "x": 171.05662536621095,
+                "y": 56.482566833496097,
+                "z": 2.6318957805633547
+            }
+        },
+        {
+            "file": "chunks/TFF_Grass_Patch_01B_000.bin",
+            "materialId": "mat_29122_TFF_Grass_Patch_01B",
+            "vertexCount": 85696,
+            "indexCount": 128544,
+            "name": "TFF_Grass_Patch_01B",
+            "boundsMin": {
+                "x": 66.95219421386719,
+                "y": -17.389381408691408,
+                "z": -0.11986637115478516
+            },
+            "boundsMax": {
+                "x": 172.18942260742188,
+                "y": 55.914451599121097,
+                "z": 2.742316246032715
+            }
+        },
+        {
+            "file": "chunks/TFF_Grass_Patch_01C_000.bin",
+            "materialId": "mat_29172_TFF_Grass_Patch_01C",
+            "vertexCount": 73008,
+            "indexCount": 109512,
+            "name": "TFF_Grass_Patch_01C",
+            "boundsMin": {
+                "x": 66.64149475097656,
+                "y": -16.7359561920166,
+                "z": -0.17882823944091798
+            },
+            "boundsMax": {
+                "x": 172.80145263671876,
+                "y": 56.029151916503909,
+                "z": 2.870408296585083
+            }
+        },
+        {
+            "file": "chunks/TFF_Atlas_1A_D_000.bin",
+            "materialId": "mat_29154_TFF_Atlas_1A_D",
+            "vertexCount": 274367,
+            "indexCount": 562881,
+            "name": "TFF_Atlas_1A_D",
+            "boundsMin": {
+                "x": 37.28282928466797,
+                "y": -35.29188537597656,
+                "z": -10.99000072479248
+            },
+            "boundsMax": {
+                "x": 199.71771240234376,
+                "y": 75.66268157958985,
+                "z": 35.26853561401367
+            }
+        },
+        {
+            "file": "chunks/TFF_Atlas_Lights_1A_D_000.bin",
+            "materialId": "mat_29102_TFF_Atlas_Lights_1A_D",
+            "vertexCount": 812,
+            "indexCount": 1218,
+            "name": "TFF_Atlas_Lights_1A_D",
+            "boundsMin": {
+                "x": 98.03561401367188,
+                "y": 13.537338256835938,
+                "z": -0.07019466161727905
+            },
+            "boundsMax": {
+                "x": 158.48184204101563,
+                "y": 37.352516174316409,
+                "z": 1.551194429397583
+            }
+        }
+    ],
+    "glowLights": [
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A",
+            "position": {
+                "x": 153.8905029296875,
+                "y": 13.839064598083496,
+                "z": 0.5343923568725586
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A (1)",
+            "position": {
+                "x": 153.47731018066407,
+                "y": 13.815749168395996,
+                "z": 0.4848285913467407
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A (2)",
+            "position": {
+                "x": 154.03787231445313,
+                "y": 13.663345336914063,
+                "z": 0.4898984432220459
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A (3)",
+            "position": {
+                "x": 157.9943084716797,
+                "y": 14.151749610900879,
+                "z": 1.226828694343567
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A (4)",
+            "position": {
+                "x": 158.27984619140626,
+                "y": 14.359309196472168,
+                "z": 1.3087587356567383
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 2.0153753757476808,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A (5)",
+            "position": {
+                "x": 98.19384765625,
+                "y": 36.799468994140628,
+                "z": 0.2658286690711975
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Glowing_Mushroom_01A (6)",
+            "position": {
+                "x": 98.19951629638672,
+                "y": 37.15241622924805,
+                "z": 0.3477586507797241
+            },
+            "color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+            },
+            "range": 2.0153753757476808,
+            "intensity": 1.888177514076233
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_03A/TFF_Mushroom_03A_01",
+            "position": {
+                "x": 147.54525756835938,
+                "y": 7.670296669006348,
+                "z": 0.406070351600647
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_03A/TFF_Mushroom_03A_02",
+            "position": {
+                "x": 147.47764587402345,
+                "y": 7.644027233123779,
+                "z": 0.31082457304000857
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_03A/TFF_Mushroom_03A_03",
+            "position": {
+                "x": 147.49032592773438,
+                "y": 7.694436073303223,
+                "z": 0.24836766719818116
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_03A/TFF_Mushroom_03A_04",
+            "position": {
+                "x": 147.49057006835938,
+                "y": 7.623758792877197,
+                "z": 0.23953737318515778
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_03A/TFF_Mushroom_03A_05",
+            "position": {
+                "x": 147.53805541992188,
+                "y": 7.699429035186768,
+                "z": 0.22270528972148896
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_03A/TFF_Mushroom_03A_06",
+            "position": {
+                "x": 147.5059356689453,
+                "y": 7.651007175445557,
+                "z": 0.1819450855255127
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_07A/TFF_Mushroom_07A_01",
+            "position": {
+                "x": 152.06634521484376,
+                "y": 5.835489273071289,
+                "z": 0.22767740488052369
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_07A/TFF_Mushroom_07A_02",
+            "position": {
+                "x": 151.9769287109375,
+                "y": 5.775241851806641,
+                "z": 0.21735963225364686
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_07A/TFF_Mushroom_07A_03",
+            "position": {
+                "x": 152.156005859375,
+                "y": 5.806252956390381,
+                "z": 0.21685582399368287
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_07A/TFF_Mushroom_07A_04",
+            "position": {
+                "x": 152.0613555908203,
+                "y": 5.7545671463012699,
+                "z": 0.20953179895877839
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_07A/TFF_Mushroom_07A_05",
+            "position": {
+                "x": 152.0312042236328,
+                "y": 5.882870197296143,
+                "z": 0.1946265697479248
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_08A/TFF_Mushroom_08A_01",
+            "position": {
+                "x": 149.0594940185547,
+                "y": 7.177341461181641,
+                "z": 0.1518995761871338
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_08A/TFF_Mushroom_08A_02",
+            "position": {
+                "x": 149.05984497070313,
+                "y": 7.302488803863525,
+                "z": 0.13835716247558595
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_08A/TFF_Mushroom_08A_03",
+            "position": {
+                "x": 149.00096130371095,
+                "y": 7.0924201011657719,
+                "z": 0.13221457600593568
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        },
+        {
+            "name": "Mushrooms/TFF_Mushrooms_08A/TFF_Mushroom_08A_04",
+            "position": {
+                "x": 149.1233367919922,
+                "y": 7.250216484069824,
+                "z": 0.12178272753953934
+            },
+            "color": {
+                "r": 1.0,
+                "g": 0.47999998927116396,
+                "b": 0.12999999523162843,
+                "a": 1.0
+            },
+            "range": 1.9249999523162842,
+            "intensity": 0.9900000095367432
+        }
+    ],
+    "note": "Emergency baked/static export: world-space geometry + baked terrain diffuse + unlit texture/alpha runtime for Panda3D."
+}
